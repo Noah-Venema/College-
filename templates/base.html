@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <nav class="navbar navbar-expand-lg navbar-dark site-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('main.home') }}">
+        <i class="bi bi-mortarboard-fill me-2"></i>{{ site_name }}
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.scholarships') }}">Scholarships</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.financial_aid') }}">Financial Aid</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.applications') }}">Applications</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.schools') }}">Schools</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.housing') }}">Housing</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contacts') }}">Contacts</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.notes') }}">Notes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <main>
+    <div class="container mt-3">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer text-center py-4">
+    <div class="container">
+      <small>&copy; {{ current_year }} {{ site_name }}</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

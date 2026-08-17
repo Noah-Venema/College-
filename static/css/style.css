@@ -1,0 +1,101 @@
+:root {
+  --navy: #0a1f44;
+  --navy-dark: #061530;
+  --gold: #c8a24a;
+  --gold-light: #e0c583;
+  --cream: #f7f5f0;
+  --text: #212529;
+}
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background-color: var(--cream);
+  color: var(--text);
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Merriweather', serif;
+}
+
+/* Navbar */
+.site-navbar {
+  background-color: var(--navy);
+  border-bottom: 3px solid var(--gold);
+}
+
+.site-navbar .navbar-brand {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.site-navbar .nav-link {
+  color: #ffffffcc;
+  font-weight: 600;
+}
+
+.site-navbar .nav-link:hover,
+.site-navbar .nav-link:focus {
+  color: var(--gold-light);
+}
+
+/* Footer */
+.site-footer {
+  background-color: var(--navy);
+  color: #ffffffaa;
+}
+
+/* Hero */
+.hero-section {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+}
+
+.text-navy {
+  color: var(--navy);
+}
+
+/* Home dashboard cards */
+.section-card {
+  border: 1px solid #e4e0d6;
+  border-radius: 0.75rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.section-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.75rem 1.5rem rgba(10, 31, 68, 0.12);
+  border-color: var(--gold);
+}
+
+.section-icon {
+  font-size: 2.25rem;
+  color: var(--navy);
+}
+
+.section-card:hover .section-icon {
+  color: var(--gold);
+}
+
+/* Gold buttons */
+.btn-gold {
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-dark);
+  font-weight: 600;
+}
+
+.btn-gold:hover {
+  background-color: var(--gold-light);
+  border-color: var(--gold-light);
+  color: var(--navy-dark);
+}
+
+.btn-outline-gold {
+  border: 2px solid var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.btn-outline-gold:hover {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}

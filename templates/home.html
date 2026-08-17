@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Home — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="hero-section text-center text-white py-5">
+  <div class="container py-4">
+    <h1 class="display-4 fw-bold">Welcome back{% if current_user.username %}, {{ current_user.username }}{% endif %}</h1>
+    <p class="lead">Your one stop spot for everything college — scholarships, financial aid, applications, and more.</p>
+  </div>
+</section>
+
+<section class="container my-5">
+  <div class="row g-4">
+    {% for section in sections %}
+    <div class="col-md-6 col-lg-4">
+      <a href="{{ url_for(section.endpoint) }}" class="text-decoration-none">
+        <div class="card h-100 section-card">
+          <div class="card-body text-center">
+            <i class="bi {{ section.icon }} section-icon"></i>
+            <h5 class="card-title mt-3">{{ section.name }}</h5>
+            <p class="card-text text-muted">{{ section.desc }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
