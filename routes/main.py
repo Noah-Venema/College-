@@ -8,7 +8,7 @@ SECTIONS = [
     {"name": "Scholarships", "endpoint": "main.scholarships", "icon": "bi-award", "desc": "Track scholarship opportunities, deadlines, and status."},
     {"name": "Financial Aid", "endpoint": "main.financial_aid", "icon": "bi-cash-coin", "desc": "FAFSA, grants, loans, and award letters in one place."},
     {"name": "Applications", "endpoint": "applications.index", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
-    {"name": "School Comparison", "endpoint": "main.schools", "icon": "bi-bank", "desc": "Compare schools side by side."},
+    {"name": "School Comparison", "endpoint": "schools.index", "icon": "bi-bank", "desc": "Compare schools side by side."},
     {"name": "Campus", "endpoint": "campus.index", "icon": "bi-house-door", "desc": "Dorms, food, teacher-to-student ratio, and campus life info."},
     {"name": "Contacts", "endpoint": "contacts.index", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
     {"name": "Notes", "endpoint": "notes.board", "icon": "bi-journal-text", "desc": "General notes and reminders."},
@@ -33,9 +33,3 @@ def scholarships():
 @login_required
 def financial_aid():
     return render_template("placeholder.html", title="Financial Aid")
-
-
-@main_bp.route("/schools")
-@login_required
-def schools():
-    return render_template("placeholder.html", title="School Comparison")

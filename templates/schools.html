@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}School Comparison — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-bank text-navy"></i> School Comparison</h1>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Add School</h5>
+    <form method="POST" action="{{ url_for('schools.index') }}" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Location</label>
+        <input type="text" name="location" class="form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Size (student population)</label>
+        <input type="text" name="size" class="form-control" placeholder="e.g. 12,000 students">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tuition/Cost</label>
+        <input type="text" name="tuition" class="form-control" placeholder="e.g. $18,000/year">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Acceptance Rate</label>
+        <input type="text" name="acceptance_rate" class="form-control" placeholder="e.g. 74%">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Notes</label>
+        <input type="text" name="notes" class="form-control">
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-gold">Add School</button>
+      </div>
+    </form>
+  </div>
+
+  {% if schools %}
+  <div class="table-responsive mb-5">
+    <table class="table align-middle bg-white shadow-sm rounded">
+      <thead>
+        <tr>
+          <th>School</th>
+          <th>Location</th>
+          <th>Size</th>
+          <th>Tuition</th>
+          <th>Acceptance Rate</th>
+          <th>Notes</th>
+          <th>Campus Life</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for school in schools %}
+        <tr>
+          <td><strong>{{ school.name }}</strong></td>
+          <td>{{ school.location or '—' }}</td>
+          <td>{{ school.size or '—' }}</td>
+          <td>{{ school.tuition or '—' }}</td>
+          <td>{{ school.acceptance_rate or '—' }}</td>
+          <td>{{ school.notes or '—' }}</td>
+          <td>
+            {% set campus = campus_map.get(school.name.strip().lower()) %}
+            {% if campus %}
+              <small>
+                {% if campus.housing_info %}<div><strong>Housing:</strong> {{ campus.housing_info }}</div>{% endif %}
+                {% if campus.food_info %}<div><strong>Food:</strong> {{ campus.food_info }}</div>{% endif %}
+                {% if campus.student_ratio %}<div><strong>Ratio:</strong> {{ campus.student_ratio }}</div>{% endif %}
+                {% if campus.notes %}<div>{{ campus.notes }}</div>{% endif %}
+              </small>
+            {% else %}
+              <span class="text-muted small">No Campus info yet</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-school-{{ school.id }}">Edit</button>
+            <form method="POST" action="{{ url_for('schools.delete_school', school_id=school.id) }}" class="d-inline" onsubmit="return confirm('Delete this school?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <tr class="collapse" id="edit-school-{{ school.id }}">
+          <td colspan="8">
+            <form method="POST" action="{{ url_for('schools.edit_school', school_id=school.id) }}" class="row g-2 align-items-end">
+              <div class="col-md-2">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control form-control-sm" value="{{ school.name }}" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-control form-control-sm" value="{{ school.location or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Size</label>
+                <input type="text" name="size" class="form-control form-control-sm" value="{{ school.size or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Tuition</label>
+                <input type="text" name="tuition" class="form-control form-control-sm" value="{{ school.tuition or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Acceptance Rate</label>
+                <input type="text" name="acceptance_rate" class="form-control form-control-sm" value="{{ school.acceptance_rate or '' }}">
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">Notes</label>
+                <input type="text" name="notes" class="form-control form-control-sm" value="{{ school.notes or '' }}">
+              </div>
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-gold btn-sm w-100">Save</button>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-muted mb-5">No schools yet — add your first one above to get started.</p>
+  {% endif %}
+
+  <h3 class="mb-3"><i class="bi bi-arrow-left-right text-navy"></i> Matchups</h3>
+
+  {% if schools|length >= 2 %}
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Add Matchup</h5>
+    <form method="POST" action="{{ url_for('schools.add_matchup') }}" class="row g-3">
+      <div class="col-md-5">
+        <label class="form-label">School A</label>
+        <select name="school_a_id" class="form-select" required>
+          {% for school in schools %}
+          <option value="{{ school.id }}">{{ school.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">School B</label>
+        <select name="school_b_id" class="form-select" required>
+          {% for school in schools %}
+          <option value="{{ school.id }}">{{ school.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-gold w-100">Compare</button>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" name="notes" class="form-control" placeholder="e.g. Leaning towards School A because of cost">
+      </div>
+    </form>
+  </div>
+  {% else %}
+    <p class="text-muted">Add at least 2 schools above to create a matchup.</p>
+  {% endif %}
+
+  {% if matchups %}
+    {% for matchup in matchups %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h5 class="card-title mb-1">{{ matchup.school_a.name }} <span class="text-muted">vs</span> {{ matchup.school_b.name }}</h5>
+          <form method="POST" action="{{ url_for('schools.delete_matchup', matchup_id=matchup.id) }}" onsubmit="return confirm('Delete this matchup?');">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
+        {% if matchup.notes %}<p class="mb-0">{{ matchup.notes }}</p>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No matchups saved yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
