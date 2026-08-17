@@ -100,6 +100,19 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   color: var(--navy-dark);
 }
 
+.btn-outline-navy {
+  border: 2px solid var(--navy);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.btn-outline-navy:hover,
+.btn-outline-navy.active {
+  background-color: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
 /* Applications sub-tabs */
 .app-subtabs .nav-link {
   color: var(--navy);
@@ -300,3 +313,196 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .aid-status-badge.status-denied {
   background-color: #dc3545;
 }
+
+/* Calendar */
+.sync-card {
+  border: 1px solid var(--gold);
+  background-color: #fdfbf6;
+}
+
+.category-badge {
+  font-size: 0.75rem;
+}
+
+.category-task {
+  background-color: #6c757d;
+}
+
+.category-scholarship {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.category-application {
+  background-color: #0d6efd;
+}
+
+.category-financial-aid {
+  background-color: #198754;
+}
+
+.category-other {
+  background-color: #6f42c1;
+}
+
+.deadline-past {
+  opacity: 0.6;
+}
+
+/* Mini calendar widget */
+.mini-calendar-card {
+  border: 1px solid rgba(10, 31, 68, 0.15);
+}
+
+.mc-day-detail {
+  border-top: 1px solid rgba(10, 31, 68, 0.1);
+  padding-top: 0.75rem;
+}
+
+.mc-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+
+/* Week view */
+.mc-grid-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.mc-week-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-week-heading {
+  text-align: center;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.8rem;
+  padding-bottom: 0.25rem;
+}
+
+.mc-day {
+  border: 1px solid rgba(10, 31, 68, 0.1);
+  border-radius: 6px;
+  padding: 0.4rem;
+  min-height: 70px;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.15s ease;
+}
+
+.mc-day:hover {
+  background-color: var(--cream);
+}
+
+.mc-day-today {
+  border-color: var(--gold);
+  border-width: 2px;
+  background-color: #fdfaf2;
+}
+
+.mc-day-other-month {
+  opacity: 0.4;
+}
+
+.mc-day-num {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--navy);
+}
+
+.mc-dots {
+  margin-top: 0.25rem;
+}
+
+.mc-labels {
+  margin-top: 0.25rem;
+}
+
+.mc-label {
+  font-size: 0.65rem;
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mc-label-more {
+  font-size: 0.65rem;
+  color: var(--navy);
+  font-style: italic;
+}
+
+/* Month view */
+.mc-grid-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+.mc-grid-month .mc-day {
+  min-height: 60px;
+}
+
+/* Year view */
+.mc-grid-year {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.mc-mini-month-heading {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mc-mini-month-heading:hover {
+  color: var(--gold);
+}
+
+.mc-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.mc-mini-day {
+  font-size: 0.6rem;
+  text-align: center;
+  padding: 2px 0;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.mc-mini-day:hover {
+  background-color: var(--cream);
+}
+
+.mc-mini-day-other-month {
+  opacity: 0.25;
+}
+
+.mc-mini-day-today {
+  border: 1px solid var(--gold);
+  font-weight: 700;
+}
+
+.mc-mini-day-has-event {
+  background-color: var(--gold-light);
+  font-weight: 700;
+}
+
