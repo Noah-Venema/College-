@@ -5,8 +5,8 @@ main_bp = Blueprint("main", __name__)
 
 # Sections shown as tiles on the home dashboard and in the navbar.
 SECTIONS = [
-    {"name": "Scholarships", "endpoint": "main.scholarships", "icon": "bi-award", "desc": "Track scholarship opportunities, deadlines, and status."},
-    {"name": "Financial Aid", "endpoint": "main.financial_aid", "icon": "bi-cash-coin", "desc": "FAFSA, grants, loans, and award letters in one place."},
+    {"name": "Scholarships", "endpoint": "scholarships.index", "icon": "bi-award", "desc": "Track scholarship opportunities, deadlines, and status."},
+    {"name": "Financial Aid", "endpoint": "financial_aid.index", "icon": "bi-cash-coin", "desc": "FAFSA, grants, loans, and award letters in one place."},
     {"name": "Applications", "endpoint": "applications.index", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
     {"name": "School Comparison", "endpoint": "schools.index", "icon": "bi-bank", "desc": "Compare schools side by side."},
     {"name": "Campus", "endpoint": "campus.index", "icon": "bi-house-door", "desc": "Dorms, food, teacher-to-student ratio, and campus life info."},
@@ -19,17 +19,3 @@ SECTIONS = [
 @login_required
 def home():
     return render_template("home.html", sections=SECTIONS)
-
-
-# Placeholder routes for each section — real functionality is built out on
-# feature branches one at a time. These exist now so links never 404.
-@main_bp.route("/scholarships")
-@login_required
-def scholarships():
-    return render_template("placeholder.html", title="Scholarships")
-
-
-@main_bp.route("/financial-aid")
-@login_required
-def financial_aid():
-    return render_template("placeholder.html", title="Financial Aid")

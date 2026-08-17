@@ -145,3 +145,30 @@ class Matchup(db.Model):
 
     school_a = db.relationship("School", foreign_keys=[school_a_id])
     school_b = db.relationship("School", foreign_keys=[school_b_id])
+
+
+class Scholarship(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    amount = db.Column(db.String(30))
+    deadline = db.Column(db.String(20))
+    status = db.Column(db.String(20), nullable=False, default="Not Started")
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    STATUSES = ["Not Started", "In Progress", "Submitted", "Awarded", "Rejected"]
+
+
+class FinancialAid(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    source = db.Column(db.String(30), nullable=False, default="Other")
+    name = db.Column(db.String(200))
+    amount = db.Column(db.String(30))
+    status = db.Column(db.String(20), nullable=False, default="Pending")
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    SOURCES = ["FAFSA", "Grant", "Loan", "Work-Study", "Other"]
+    STATUSES = ["Pending", "Received", "Denied"]

@@ -40,6 +40,8 @@ def create_app():
     from routes.contacts import contacts_bp
     from routes.campus import campus_bp
     from routes.schools import schools_bp
+    from routes.scholarships import scholarships_bp
+    from routes.financial_aid import financial_aid_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -48,6 +50,8 @@ def create_app():
     app.register_blueprint(contacts_bp)
     app.register_blueprint(campus_bp)
     app.register_blueprint(schools_bp)
+    app.register_blueprint(scholarships_bp)
+    app.register_blueprint(financial_aid_bp)
 
     @app.context_processor
     def inject_globals():

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Financial Aid — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-cash-coin text-navy"></i> Financial Aid</h1>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Add Entry</h5>
+        <form method="POST" action="{{ url_for('financial_aid.index') }}">
+          <div class="mb-3">
+            <label class="form-label">Source</label>
+            <select name="source" class="form-select">
+              {% for s in sources %}
+              <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name (optional)</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Federal Pell Grant">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <input type="text" name="amount" class="form-control" placeholder="e.g. $5,500">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              {% for s in statuses %}
+              <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold w-100">Add Entry</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if aid_entries %}
+        {% for aid in aid_entries %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title mb-1">
+                {{ aid.name or aid.source }}
+                <span class="badge source-badge source-{{ aid.source|lower|replace(' ', '-') }}">{{ aid.source }}</span>
+              </h5>
+              <span class="badge aid-status-badge status-{{ aid.status|lower }}">{{ aid.status }}</span>
+            </div>
+            {% if aid.amount %}<p class="text-muted mb-1"><i class="bi bi-cash-coin"></i> {{ aid.amount }}</p>{% endif %}
+            {% if aid.notes %}<p class="mb-2">{{ aid.notes }}</p>{% endif %}
+
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-aid-{{ aid.id }}">
+              Edit
+            </button>
+            <form method="POST" action="{{ url_for('financial_aid.delete_aid', aid_id=aid.id) }}" class="d-inline" onsubmit="return confirm('Delete this entry?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+
+            <div class="collapse mt-3" id="edit-aid-{{ aid.id }}">
+              <form method="POST" action="{{ url_for('financial_aid.edit_aid', aid_id=aid.id) }}">
+                <div class="mb-2">
+                  <label class="form-label">Source</label>
+                  <select name="source" class="form-select">
+                    {% for s in sources %}
+                    <option value="{{ s }}" {% if s == aid.source %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Name (optional)</label>
+                  <input type="text" name="name" class="form-control" value="{{ aid.name or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Amount</label>
+                  <input type="text" name="amount" class="form-control" value="{{ aid.amount or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Status</label>
+                  <select name="status" class="form-select">
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if s == aid.status %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Notes</label>
+                  <textarea name="notes" class="form-control" rows="3">{{ aid.notes or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No financial aid entries yet — add your first one to get started.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
