@@ -111,3 +111,14 @@ class Contact(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     ROLES = ["Admissions Rep", "Counselor", "Coach", "Teacher", "Other"]
+
+
+class Campus(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    school_name = db.Column(db.String(200), nullable=False)
+    housing_info = db.Column(db.Text)
+    food_info = db.Column(db.Text)
+    student_ratio = db.Column(db.String(50))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
