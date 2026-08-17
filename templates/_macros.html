@@ -1,0 +1,6 @@
+{% macro empty_state(message, icon='bi-inbox') %}
+<div class="empty-state">
+  <i class="bi {{ icon }}"></i>
+  <p>{{ message }}</p>
+</div>
+{% endmacro %}

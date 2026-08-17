@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
 {% block title %}Scholarships — {{ site_name }}{% endblock %}
 {% block content %}
 <section class="container my-5">
@@ -15,7 +16,10 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Amount</label>
-            <input type="text" name="amount" class="form-control" placeholder="e.g. $1,000">
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="text" name="amount" class="form-control" placeholder="1,000">
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Deadline</label>
@@ -68,7 +72,10 @@
                 </div>
                 <div class="mb-2">
                   <label class="form-label">Amount</label>
-                  <input type="text" name="amount" class="form-control" value="{{ scholarship.amount or '' }}">
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="text" name="amount" class="form-control" value="{{ scholarship.amount or '' }}">
+                  </div>
                 </div>
                 <div class="mb-2">
                   <label class="form-label">Deadline</label>
@@ -93,7 +100,7 @@
         </div>
         {% endfor %}
       {% else %}
-        <p class="text-muted">No scholarships yet — add your first one to get started.</p>
+        {{ empty_state("No scholarships yet — add your first one to get started.", "bi-award") }}
       {% endif %}
     </div>
   </div>

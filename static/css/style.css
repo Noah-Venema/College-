@@ -5,6 +5,15 @@
   --gold-light: #e0c583;
   --cream: #f7f5f0;
   --text: #212529;
+
+  /* Shared badge/accent palette — muted tones that sit alongside navy/gold
+     instead of default Bootstrap primaries, used across every badge type
+     (status, level, role, source, category) for a consistent look. */
+  --badge-gray: #7d7669;
+  --badge-blue: #3a5a8c;
+  --badge-green: #4c8063;
+  --badge-red: #b1493f;
+  --badge-purple: #6f5f96;
 }
 
 body {
@@ -36,6 +45,58 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .site-navbar .nav-link:hover,
 .site-navbar .nav-link:focus {
   color: var(--gold-light);
+}
+
+.site-navbar {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Keep the toggler close to the screen edge, brand spaced 0.25in after it,
+   and the nav links always tucked behind the hamburger (no expand breakpoint). */
+.navbar-edge-padding {
+  padding-left: 0.5in;
+  padding-right: 0.5in;
+  justify-content: flex-start !important;
+}
+
+.navbar-brand-gap {
+  margin-left: 0.25in;
+  margin-right: 0;
+}
+
+.site-navbar .navbar-collapse {
+  margin-top: 0.75rem;
+}
+
+/* Menu items: Home on its own row, then 3-per-row after it */
+.navbar-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, auto));
+  column-gap: 2rem;
+  row-gap: 0.25rem;
+}
+
+.navbar-nav-grid .nav-item-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 767.98px) {
+  .navbar-edge-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .navbar-nav-grid {
+    grid-template-columns: repeat(2, minmax(110px, auto));
+    column-gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-nav-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Footer */
@@ -131,7 +192,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .status-not-started {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .status-draft {
@@ -140,11 +201,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .status-final {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .status-submitted {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .essay-notes {
@@ -157,11 +218,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .level-school {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .level-district {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .level-state {
@@ -170,15 +231,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .level-national {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .level-regular {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .level-honors {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .level-ap {
@@ -187,7 +248,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .level-dual-enrollment {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 /* Testing */
@@ -229,7 +290,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .role-admissions-rep {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .role-counselor {
@@ -238,15 +299,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .role-coach {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .role-teacher {
-  background-color: #6f42c1;
+  background-color: var(--badge-purple);
 }
 
 .role-other {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 /* Scholarship status badges */
@@ -255,7 +316,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .scholarship-status-badge.status-not-started {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .scholarship-status-badge.status-in-progress {
@@ -264,15 +325,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .scholarship-status-badge.status-submitted {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .scholarship-status-badge.status-awarded {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .scholarship-status-badge.status-rejected {
-  background-color: #dc3545;
+  background-color: var(--badge-red);
 }
 
 /* Financial Aid badges */
@@ -286,19 +347,19 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .source-grant {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .source-loan {
-  background-color: #dc3545;
+  background-color: var(--badge-red);
 }
 
 .source-work-study {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .source-other {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .aid-status-badge.status-pending {
@@ -307,11 +368,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .aid-status-badge.status-received {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .aid-status-badge.status-denied {
-  background-color: #dc3545;
+  background-color: var(--badge-red);
 }
 
 /* Calendar */
@@ -320,12 +381,40 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   background-color: #fdfbf6;
 }
 
+.input-group-text {
+  background-color: var(--cream);
+  border-color: #ced4da;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 2px dashed rgba(10, 31, 68, 0.15);
+  border-radius: 0.75rem;
+  color: #8a8578;
+}
+
+.empty-state i {
+  font-size: 2.25rem;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.empty-state p {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
 .category-badge {
   font-size: 0.75rem;
 }
 
 .category-task {
-  background-color: #6c757d;
+  background-color: var(--badge-gray);
 }
 
 .category-scholarship {
@@ -334,15 +423,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 
 .category-application {
-  background-color: #0d6efd;
+  background-color: var(--badge-blue);
 }
 
 .category-financial-aid {
-  background-color: #198754;
+  background-color: var(--badge-green);
 }
 
 .category-other {
-  background-color: #6f42c1;
+  background-color: var(--badge-purple);
 }
 
 .deadline-past {
