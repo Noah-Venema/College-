@@ -122,3 +122,26 @@ class Campus(db.Model):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class School(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200))
+    size = db.Column(db.String(50))
+    tuition = db.Column(db.String(50))
+    acceptance_rate = db.Column(db.String(20))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Matchup(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    school_a_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
+    school_b_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    school_a = db.relationship("School", foreign_keys=[school_a_id])
+    school_b = db.relationship("School", foreign_keys=[school_b_id])

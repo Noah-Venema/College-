@@ -39,6 +39,7 @@ def create_app():
     from routes.notes import notes_bp
     from routes.contacts import contacts_bp
     from routes.campus import campus_bp
+    from routes.schools import schools_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(notes_bp)
     app.register_blueprint(contacts_bp)
     app.register_blueprint(campus_bp)
+    app.register_blueprint(schools_bp)
 
     @app.context_processor
     def inject_globals():
