@@ -10,7 +10,7 @@ SECTIONS = [
     {"name": "Applications", "endpoint": "applications.index", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
     {"name": "School Comparison", "endpoint": "main.schools", "icon": "bi-bank", "desc": "Compare schools side by side."},
     {"name": "Housing", "endpoint": "main.housing", "icon": "bi-house-door", "desc": "Dorms, off-campus options, and housing notes."},
-    {"name": "Contacts", "endpoint": "main.contacts", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
+    {"name": "Contacts", "endpoint": "contacts.index", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
     {"name": "Notes", "endpoint": "notes.board", "icon": "bi-journal-text", "desc": "General notes and reminders."},
 ]
 
@@ -45,9 +45,3 @@ def schools():
 @login_required
 def housing():
     return render_template("placeholder.html", title="Housing")
-
-
-@main_bp.route("/contacts")
-@login_required
-def contacts():
-    return render_template("placeholder.html", title="Contacts")

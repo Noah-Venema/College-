@@ -209,3 +209,29 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   border: 1px solid #e4e0d6;
   border-radius: 0.6rem;
 }
+
+/* Contacts role badges */
+.role-badge {
+  font-size: 0.75rem;
+}
+
+.role-admissions-rep {
+  background-color: #0d6efd;
+}
+
+.role-counselor {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.role-coach {
+  background-color: #198754;
+}
+
+.role-teacher {
+  background-color: #6f42c1;
+}
+
+.role-other {
+  background-color: #6c757d;
+}

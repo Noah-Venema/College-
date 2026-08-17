@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Contacts — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-person-lines-fill text-navy"></i> Contacts</h1>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Add Contact</h5>
+        <form method="POST" action="{{ url_for('contacts.index') }}">
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+              {% for r in roles %}
+              <option value="{{ r }}">{{ r }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Organization / School</label>
+            <input type="text" name="organization" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="text" name="phone" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold w-100">Add Contact</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if contacts %}
+        {% for contact in contacts %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title mb-1">{{ contact.name }}</h5>
+              <span class="badge role-badge role-{{ contact.role|lower|replace(' ', '-') }}">{{ contact.role }}</span>
+            </div>
+            {% if contact.organization %}<p class="text-muted mb-1"><i class="bi bi-bank"></i> {{ contact.organization }}</p>{% endif %}
+            {% if contact.email %}<p class="mb-1"><i class="bi bi-envelope"></i> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>{% endif %}
+            {% if contact.phone %}<p class="mb-1"><i class="bi bi-telephone"></i> <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a></p>{% endif %}
+            {% if contact.notes %}<p class="mb-2">{{ contact.notes }}</p>{% endif %}
+
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-contact-{{ contact.id }}">
+              Edit
+            </button>
+            <form method="POST" action="{{ url_for('contacts.delete_contact', contact_id=contact.id) }}" class="d-inline" onsubmit="return confirm('Delete this contact?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+
+            <div class="collapse mt-3" id="edit-contact-{{ contact.id }}">
+              <form method="POST" action="{{ url_for('contacts.edit_contact', contact_id=contact.id) }}">
+                <div class="mb-2">
+                  <label class="form-label">Name</label>
+                  <input type="text" name="name" class="form-control" value="{{ contact.name }}" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Role</label>
+                  <select name="role" class="form-select">
+                    {% for r in roles %}
+                    <option value="{{ r }}" {% if r == contact.role %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Organization / School</label>
+                  <input type="text" name="organization" class="form-control" value="{{ contact.organization or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Email</label>
+                  <input type="email" name="email" class="form-control" value="{{ contact.email or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Phone</label>
+                  <input type="text" name="phone" class="form-control" value="{{ contact.phone or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Notes</label>
+                  <textarea name="notes" class="form-control" rows="3">{{ contact.notes or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No contacts yet — add your first one to get started.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

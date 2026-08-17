@@ -97,3 +97,17 @@ class Task(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     STATUSES = ["To-Do", "In Progress", "Done"]
+
+
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(30), nullable=False, default="Other")
+    organization = db.Column(db.String(200))
+    email = db.Column(db.String(200))
+    phone = db.Column(db.String(30))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    ROLES = ["Admissions Rep", "Counselor", "Coach", "Teacher", "Other"]
