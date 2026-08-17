@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Campus — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-house-door text-navy"></i> Campus</h1>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Add Campus Info</h5>
+        <form method="POST" action="{{ url_for('campus.index') }}">
+          <div class="mb-3">
+            <label class="form-label">School Name</label>
+            <input type="text" name="school_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Dorms / Housing</label>
+            <textarea name="housing_info" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Food / Dining</label>
+            <textarea name="food_info" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Teacher-to-Student Ratio</label>
+            <input type="text" name="student_ratio" class="form-control" placeholder="e.g. 1:15">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Other Notes</label>
+            <textarea name="notes" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold w-100">Add Campus Info</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if campuses %}
+        {% for campus in campuses %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title mb-2">{{ campus.school_name }}</h5>
+
+            {% if campus.housing_info %}<p class="mb-1"><strong><i class="bi bi-house"></i> Dorms/Housing:</strong> {{ campus.housing_info }}</p>{% endif %}
+            {% if campus.food_info %}<p class="mb-1"><strong><i class="bi bi-cup-straw"></i> Food/Dining:</strong> {{ campus.food_info }}</p>{% endif %}
+            {% if campus.student_ratio %}<p class="mb-1"><strong><i class="bi bi-people"></i> Teacher-to-Student Ratio:</strong> {{ campus.student_ratio }}</p>{% endif %}
+            {% if campus.notes %}<p class="mb-2">{{ campus.notes }}</p>{% endif %}
+
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-campus-{{ campus.id }}">
+              Edit
+            </button>
+            <form method="POST" action="{{ url_for('campus.delete_campus', campus_id=campus.id) }}" class="d-inline" onsubmit="return confirm('Delete this campus entry?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+
+            <div class="collapse mt-3" id="edit-campus-{{ campus.id }}">
+              <form method="POST" action="{{ url_for('campus.edit_campus', campus_id=campus.id) }}">
+                <div class="mb-2">
+                  <label class="form-label">School Name</label>
+                  <input type="text" name="school_name" class="form-control" value="{{ campus.school_name }}" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Dorms / Housing</label>
+                  <textarea name="housing_info" class="form-control" rows="2">{{ campus.housing_info or '' }}</textarea>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Food / Dining</label>
+                  <textarea name="food_info" class="form-control" rows="2">{{ campus.food_info or '' }}</textarea>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Teacher-to-Student Ratio</label>
+                  <input type="text" name="student_ratio" class="form-control" value="{{ campus.student_ratio or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Other Notes</label>
+                  <textarea name="notes" class="form-control" rows="3">{{ campus.notes or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No campus info yet — add your first school to get started.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

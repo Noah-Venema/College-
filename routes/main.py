@@ -9,7 +9,7 @@ SECTIONS = [
     {"name": "Financial Aid", "endpoint": "main.financial_aid", "icon": "bi-cash-coin", "desc": "FAFSA, grants, loans, and award letters in one place."},
     {"name": "Applications", "endpoint": "applications.index", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
     {"name": "School Comparison", "endpoint": "main.schools", "icon": "bi-bank", "desc": "Compare schools side by side."},
-    {"name": "Housing", "endpoint": "main.housing", "icon": "bi-house-door", "desc": "Dorms, off-campus options, and housing notes."},
+    {"name": "Campus", "endpoint": "campus.index", "icon": "bi-house-door", "desc": "Dorms, food, teacher-to-student ratio, and campus life info."},
     {"name": "Contacts", "endpoint": "contacts.index", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
     {"name": "Notes", "endpoint": "notes.board", "icon": "bi-journal-text", "desc": "General notes and reminders."},
 ]
@@ -39,9 +39,3 @@ def financial_aid():
 @login_required
 def schools():
     return render_template("placeholder.html", title="School Comparison")
-
-
-@main_bp.route("/housing")
-@login_required
-def housing():
-    return render_template("placeholder.html", title="Housing")
