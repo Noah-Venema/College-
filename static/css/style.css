@@ -373,6 +373,44 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   font-size: 0.75rem;
 }
 
+/* Discover Scholarships panel */
+.discover-card {
+  border-left: 4px solid var(--gold);
+}
+
+.discover-tile {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid #e4dfd3;
+  border-radius: 8px;
+  height: 100%;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.discover-tile:hover {
+  background-color: #faf7ee;
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.discover-tile i.bi {
+  font-size: 1.4rem;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+
+.discover-tile-name {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.discover-tile-desc {
+  font-size: 0.85rem;
+  color: #8a8578;
+}
+
 .scholarship-status-badge.status-not-started {
   background-color: var(--badge-gray);
 }

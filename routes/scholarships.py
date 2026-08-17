@@ -30,6 +30,48 @@ def _format_currency(value):
     return f"${value:,.2f}" if value % 1 else f"${value:,.0f}"
 
 
+def _normalize_url(url):
+    """Prepend https:// if the user typed a bare domain (e.g. "fastweb.com")."""
+    url = (url or "").strip()
+    if url and not re.match(r"^https?://", url, re.IGNORECASE):
+        url = "https://" + url
+    return url
+
+
+DISCOVER_LINKS = [
+    {
+        "name": "Fastweb",
+        "url": "https://www.fastweb.com/college-scholarships",
+        "desc": "One of the largest free scholarship matching services.",
+        "icon": "bi-lightning-charge",
+    },
+    {
+        "name": "Scholarships.com",
+        "url": "https://www.scholarships.com/financial-aid/college-scholarships/",
+        "desc": "Searchable database of scholarships by school, major, and more.",
+        "icon": "bi-mortarboard",
+    },
+    {
+        "name": "Bold.org",
+        "url": "https://bold.org/scholarships/",
+        "desc": "Scholarships from individuals, companies, and nonprofits.",
+        "icon": "bi-star",
+    },
+    {
+        "name": "BigFuture (College Board)",
+        "url": "https://bigfuture.collegeboard.org/scholarship-search",
+        "desc": "College Board's official scholarship search tool.",
+        "icon": "bi-bank2",
+    },
+    {
+        "name": "Niche",
+        "url": "https://www.niche.com/colleges/scholarships/",
+        "desc": "Scholarships including Niche's own no-essay awards.",
+        "icon": "bi-search-heart",
+    },
+]
+
+
 @scholarships_bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -43,6 +85,7 @@ def index():
                 amount=request.form.get("amount", "").strip(),
                 deadline=request.form.get("deadline", "").strip(),
                 status=request.form.get("status", "Not Started"),
+                link=_normalize_url(request.form.get("link", "")),
                 notes=request.form.get("notes", "").strip(),
             )
             db.session.add(scholarship)
@@ -61,6 +104,7 @@ def index():
         statuses=Scholarship.STATUSES,
         total_applied=_format_currency(total_applied),
         total_won=_format_currency(total_won),
+        discover_links=DISCOVER_LINKS,
     )
 
 
@@ -72,6 +116,7 @@ def edit_scholarship(scholarship_id):
     scholarship.amount = request.form.get("amount", "").strip()
     scholarship.deadline = request.form.get("deadline", "").strip()
     scholarship.status = request.form.get("status", scholarship.status)
+    scholarship.link = _normalize_url(request.form.get("link", ""))
     scholarship.notes = request.form.get("notes", "").strip()
     db.session.commit()
     flash("Scholarship updated.", "success")
