@@ -310,6 +310,64 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   background-color: var(--badge-gray);
 }
 
+/* Scholarship summary totals */
+.total-card {
+  min-width: 170px;
+  border-width: 2px;
+}
+
+.total-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8a8578;
+  font-weight: 600;
+}
+
+.total-value {
+  font-family: 'Merriweather', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.total-applied {
+  border-color: var(--navy);
+}
+
+.total-applied .total-value {
+  color: var(--navy);
+}
+
+.total-won {
+  border-color: var(--gold);
+}
+
+.total-won .total-value {
+  color: #8a6d1f;
+}
+
+.btn-outline-awarded {
+  border: 2px solid var(--badge-green);
+  color: var(--badge-green);
+  font-weight: 600;
+}
+
+.btn-outline-awarded:hover {
+  background-color: var(--badge-green);
+  color: #fff;
+}
+
+.btn-awarded {
+  background-color: var(--badge-green);
+  border: 2px solid var(--badge-green);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-awarded:disabled {
+  opacity: 1;
+}
+
 /* Scholarship status badges */
 .scholarship-status-badge {
   font-size: 0.75rem;

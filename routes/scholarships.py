@@ -1,3 +1,5 @@
+import re
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required
 
@@ -5,6 +7,27 @@ from app import db
 from models import Scholarship
 
 scholarships_bp = Blueprint("scholarships", __name__, url_prefix="/scholarships")
+
+
+def _parse_amount(amount_str):
+    """Best-effort parse of a free-text amount field (e.g. "$1,000.50") into a float.
+
+    Returns 0.0 if nothing numeric can be found, since amounts are stored as
+    free text and aren't guaranteed to be well-formed.
+    """
+    if not amount_str:
+        return 0.0
+    match = re.search(r"[\d,]+(?:\.\d+)?", amount_str)
+    if not match:
+        return 0.0
+    try:
+        return float(match.group().replace(",", ""))
+    except ValueError:
+        return 0.0
+
+
+def _format_currency(value):
+    return f"${value:,.2f}" if value % 1 else f"${value:,.0f}"
 
 
 @scholarships_bp.route("/", methods=["GET", "POST"])
@@ -28,10 +51,16 @@ def index():
         return redirect(url_for("scholarships.index"))
 
     all_scholarships = Scholarship.query.order_by(Scholarship.updated_at.desc()).all()
+
+    total_applied = sum(_parse_amount(s.amount) for s in all_scholarships)
+    total_won = sum(_parse_amount(s.amount) for s in all_scholarships if s.status == "Awarded")
+
     return render_template(
         "scholarships.html",
         scholarships=all_scholarships,
         statuses=Scholarship.STATUSES,
+        total_applied=_format_currency(total_applied),
+        total_won=_format_currency(total_won),
     )
 
 
@@ -46,6 +75,16 @@ def edit_scholarship(scholarship_id):
     scholarship.notes = request.form.get("notes", "").strip()
     db.session.commit()
     flash("Scholarship updated.", "success")
+    return redirect(url_for("scholarships.index"))
+
+
+@scholarships_bp.route("/<int:scholarship_id>/mark-awarded", methods=["POST"])
+@login_required
+def mark_awarded(scholarship_id):
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
+    scholarship.status = "Awarded"
+    db.session.commit()
+    flash(f'"{scholarship.name}" marked as Awarded! 🎉', "success")
     return redirect(url_for("scholarships.index"))
 
 
