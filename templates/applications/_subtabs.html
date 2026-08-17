@@ -1,0 +1,9 @@
+<ul class="nav nav-tabs app-subtabs mb-4">
+  {% for tab in tabs %}
+  <li class="nav-item">
+    <a class="nav-link {% if tab.name == active_tab %}active{% endif %}" href="{{ url_for(tab.endpoint) }}">
+      {{ tab.name }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>

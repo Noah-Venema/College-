@@ -17,3 +17,72 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class Essay(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    prompt = db.Column(db.Text)
+    school_name = db.Column(db.String(200))
+    status = db.Column(db.String(30), nullable=False, default="Not Started")
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    STATUSES = ["Not Started", "Draft", "Final", "Submitted"]
+
+
+class Honor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    level = db.Column(db.String(30), nullable=False, default="School")
+    date_received = db.Column(db.String(20))
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    LEVELS = ["School", "District", "State", "National"]
+
+
+class Activity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    level = db.Column(db.String(30), nullable=False, default="School")
+    years_participated = db.Column(db.String(50))
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    LEVELS = ["School", "District", "State", "National"]
+
+
+class SchoolProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    high_school_name = db.Column(db.String(200))
+    gpa = db.Column(db.String(10))
+    class_size = db.Column(db.String(20))
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    grade = db.Column(db.String(10))
+    term = db.Column(db.String(50))
+    level = db.Column(db.String(30), nullable=False, default="Regular")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    LEVELS = ["Regular", "Honors", "AP", "Dual Enrollment"]
+
+
+class TestEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    test_name = db.Column(db.String(100), nullable=False)
+    date_taken = db.Column(db.String(20))
+    score = db.Column(db.String(30))
+    notes = db.Column(db.Text)
+    file_path = db.Column(db.String(300))
+    original_filename = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

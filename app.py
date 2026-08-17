@@ -16,8 +16,12 @@ def create_app():
         app.instance_path, "college.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads", "test_proofs")
+    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB per upload
+    app.config["ALLOWED_UPLOAD_EXTENSIONS"] = {"png", "jpg", "jpeg", "gif", "pdf", "heic"}
 
     os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -31,9 +35,11 @@ def create_app():
 
     from routes.auth import auth_bp
     from routes.main import main_bp
+    from routes.applications import applications_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(applications_bp)
 
     @app.context_processor
     def inject_globals():

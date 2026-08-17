@@ -99,3 +99,93 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   background-color: var(--gold);
   color: var(--navy-dark);
 }
+
+/* Applications sub-tabs */
+.app-subtabs .nav-link {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.app-subtabs .nav-link.active {
+  color: var(--navy-dark);
+  border-color: var(--gold) var(--gold) #fff;
+  border-bottom: 3px solid var(--gold);
+}
+
+/* Status badges */
+.status-badge {
+  font-size: 0.75rem;
+}
+
+.status-not-started {
+  background-color: #6c757d;
+}
+
+.status-draft {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.status-final {
+  background-color: #0d6efd;
+}
+
+.status-submitted {
+  background-color: #198754;
+}
+
+.essay-notes {
+  white-space: pre-line;
+}
+
+/* Honor/award level badges */
+.level-badge {
+  font-size: 0.75rem;
+}
+
+.level-school {
+  background-color: #6c757d;
+}
+
+.level-district {
+  background-color: #0d6efd;
+}
+
+.level-state {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.level-national {
+  background-color: #198754;
+}
+
+.level-regular {
+  background-color: #6c757d;
+}
+
+.level-honors {
+  background-color: #0d6efd;
+}
+
+.level-ap {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.level-dual-enrollment {
+  background-color: #198754;
+}
+
+/* Testing */
+.test-score-badge {
+  background-color: var(--navy);
+  font-size: 0.85rem;
+}
+
+.test-proof-thumb {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 0.5rem;
+  border: 1px solid #e4e0d6;
+}

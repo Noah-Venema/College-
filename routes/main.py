@@ -7,7 +7,7 @@ main_bp = Blueprint("main", __name__)
 SECTIONS = [
     {"name": "Scholarships", "endpoint": "main.scholarships", "icon": "bi-award", "desc": "Track scholarship opportunities, deadlines, and status."},
     {"name": "Financial Aid", "endpoint": "main.financial_aid", "icon": "bi-cash-coin", "desc": "FAFSA, grants, loans, and award letters in one place."},
-    {"name": "Applications", "endpoint": "main.applications", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
+    {"name": "Applications", "endpoint": "applications.index", "icon": "bi-file-earmark-text", "desc": "Essays, honors, awards, and application progress."},
     {"name": "School Comparison", "endpoint": "main.schools", "icon": "bi-bank", "desc": "Compare schools side by side."},
     {"name": "Housing", "endpoint": "main.housing", "icon": "bi-house-door", "desc": "Dorms, off-campus options, and housing notes."},
     {"name": "Contacts", "endpoint": "main.contacts", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
@@ -33,12 +33,6 @@ def scholarships():
 @login_required
 def financial_aid():
     return render_template("placeholder.html", title="Financial Aid")
-
-
-@main_bp.route("/applications")
-@login_required
-def applications():
-    return render_template("placeholder.html", title="Applications")
 
 
 @main_bp.route("/schools")
