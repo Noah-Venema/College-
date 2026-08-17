@@ -189,3 +189,23 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   border-radius: 0.5rem;
   border: 1px solid #e4e0d6;
 }
+
+/* Notes task board */
+.task-column {
+  background-color: #f0ede4;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.task-column-header {
+  border-bottom: 3px solid var(--gold);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--navy);
+}
+
+.task-card {
+  border: 1px solid #e4e0d6;
+  border-radius: 0.6rem;
+}

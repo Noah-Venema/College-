@@ -11,7 +11,7 @@ SECTIONS = [
     {"name": "School Comparison", "endpoint": "main.schools", "icon": "bi-bank", "desc": "Compare schools side by side."},
     {"name": "Housing", "endpoint": "main.housing", "icon": "bi-house-door", "desc": "Dorms, off-campus options, and housing notes."},
     {"name": "Contacts", "endpoint": "main.contacts", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
-    {"name": "Notes", "endpoint": "main.notes", "icon": "bi-journal-text", "desc": "General notes and reminders."},
+    {"name": "Notes", "endpoint": "notes.board", "icon": "bi-journal-text", "desc": "General notes and reminders."},
 ]
 
 
@@ -51,9 +51,3 @@ def housing():
 @login_required
 def contacts():
     return render_template("placeholder.html", title="Contacts")
-
-
-@main_bp.route("/notes")
-@login_required
-def notes():
-    return render_template("placeholder.html", title="Notes")
