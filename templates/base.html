@@ -32,6 +32,7 @@
           <li class="nav-item"><a class="nav-link" href="{{ url_for('campus.index') }}">Campus</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('contacts.index') }}">Contacts</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('notes.board') }}">Notes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar.index') }}">Calendar</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
         </ul>
       </div>
@@ -63,5 +64,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

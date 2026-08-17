@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Calendar — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-calendar-event text-navy"></i> Calendar</h1>
+
+  <div class="card p-4 shadow-sm mb-4 mini-calendar-card" id="miniCalendar" data-events="{{ mini_calendar_events_json|e }}">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+      <h5 class="mb-0"><i class="bi bi-calendar3"></i> <span id="mcTitle">This Week</span></h5>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Calendar view">
+          <button type="button" class="btn btn-outline-navy mc-view-btn active" data-view="week">Week</button>
+          <button type="button" class="btn btn-outline-navy mc-view-btn" data-view="month">Month</button>
+          <button type="button" class="btn btn-outline-navy mc-view-btn" data-view="year">Year</button>
+        </div>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-outline-gold" id="mcPrev"><i class="bi bi-chevron-left"></i></button>
+          <button type="button" class="btn btn-outline-gold" id="mcToday">Today</button>
+          <button type="button" class="btn btn-outline-gold" id="mcNext"><i class="bi bi-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div id="mcGrid" class="mc-grid"></div>
+    <div id="mcDayDetail" class="mc-day-detail mt-3 d-none"></div>
+  </div>
+
+  <div class="card p-4 shadow-sm mb-4 sync-card">
+    <h5 class="mb-2"><i class="bi bi-arrow-repeat"></i> Sync with Google / Apple Calendar</h5>
+    <p class="text-muted mb-3">Subscribe to this link in Google Calendar or Apple Calendar to see your deadlines there too — it updates automatically as you add/edit them here.</p>
+    <div class="input-group mb-2">
+      <input type="text" class="form-control" value="{{ feed_url }}" id="feedUrl" readonly>
+      <button class="btn btn-outline-gold" type="button" onclick="navigator.clipboard.writeText(document.getElementById('feedUrl').value)">
+        <i class="bi bi-clipboard"></i> Copy Link
+      </button>
+    </div>
+    <small class="text-muted">
+      <strong>Google Calendar:</strong> Settings &rarr; Add calendar &rarr; From URL &rarr; paste this link.<br>
+      <strong>Apple Calendar:</strong> File &rarr; New Calendar Subscription &rarr; paste this link.
+    </small>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Add Deadline</h5>
+        <form method="POST" action="{{ url_for('calendar.index') }}">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+              {% for c in categories %}
+              <option value="{{ c }}">{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold w-100">Add Deadline</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if deadlines %}
+        {% for d in deadlines %}
+        <div class="card mb-3 shadow-sm {% if d.date < today %}deadline-past{% endif %}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title mb-1">{{ d.title }}</h5>
+              <span class="badge category-badge category-{{ d.category|lower|replace(' ', '-') }}">{{ d.category }}</span>
+            </div>
+            <p class="text-muted mb-1"><i class="bi bi-calendar-event"></i> {{ d.date.strftime('%B %-d, %Y') }}</p>
+            {% if d.notes %}<p class="mb-2">{{ d.notes }}</p>{% endif %}
+
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-deadline-{{ d.id }}">
+              Edit
+            </button>
+            <form method="POST" action="{{ url_for('calendar.delete_deadline', deadline_id=d.id) }}" class="d-inline" onsubmit="return confirm('Delete this deadline?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+
+            <div class="collapse mt-3" id="edit-deadline-{{ d.id }}">
+              <form method="POST" action="{{ url_for('calendar.edit_deadline', deadline_id=d.id) }}">
+                <div class="mb-2">
+                  <label class="form-label">Title</label>
+                  <input type="text" name="title" class="form-control" value="{{ d.title }}" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Date</label>
+                  <input type="date" name="date" class="form-control" value="{{ d.date.isoformat() }}" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Category</label>
+                  <select name="category" class="form-select">
+                    {% for c in categories %}
+                    <option value="{{ c }}" {% if c == d.category %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Notes</label>
+                  <textarea name="notes" class="form-control" rows="3">{{ d.notes or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No deadlines yet — add your first one to get started.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/mini-calendar.js') }}"></script>
+{% endblock %}

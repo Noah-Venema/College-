@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,6 +11,9 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    # Unguessable token used to authenticate the calendar .ics feed URL,
+    # since external calendar apps (Google/Apple) can't send a login session.
+    calendar_token = db.Column(db.String(64), unique=True, default=lambda: uuid.uuid4().hex)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -172,3 +176,15 @@ class FinancialAid(db.Model):
 
     SOURCES = ["FAFSA", "Grant", "Loan", "Work-Study", "Other"]
     STATUSES = ["Pending", "Received", "Denied"]
+
+
+class Deadline(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    category = db.Column(db.String(30), nullable=False, default="Other")
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    CATEGORIES = ["Task", "Scholarship", "Application", "Financial Aid", "Other"]
