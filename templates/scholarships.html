@@ -17,6 +17,26 @@
     </div>
   </div>
 
+  <div class="card p-4 shadow-sm mb-4 discover-card">
+    <h5 class="mb-1"><i class="bi bi-compass"></i> Discover Real Scholarships</h5>
+    <p class="text-muted mb-3">Search these real scholarship databases, then paste the one you want into "Add Scholarship" below (with its application link) to track it here.</p>
+    <div class="row g-3">
+      {% for link in discover_links %}
+      <div class="col-sm-6 col-lg-4">
+        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+          <div class="discover-tile">
+            <i class="bi {{ link.icon }}"></i>
+            <div>
+              <div class="discover-tile-name">{{ link.name }} <i class="bi bi-box-arrow-up-right small"></i></div>
+              <div class="discover-tile-desc">{{ link.desc }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
   <div class="row g-4">
     <div class="col-lg-5">
       <div class="card p-4 shadow-sm">
@@ -36,6 +56,10 @@
           <div class="mb-3">
             <label class="form-label">Deadline</label>
             <input type="text" name="deadline" class="form-control" placeholder="e.g. March 1, 2026">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Application Link</label>
+            <input type="text" name="link" class="form-control" placeholder="https://...">
           </div>
           <div class="mb-3">
             <label class="form-label">Status</label>
@@ -69,6 +93,12 @@
             </div>
             {% if scholarship.notes %}<p class="mb-2">{{ scholarship.notes }}</p>{% endif %}
 
+            {% if scholarship.link %}
+            <a href="{{ scholarship.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-gold mb-2">
+              <i class="bi bi-box-arrow-up-right"></i> Apply Now
+            </a>
+            {% endif %}
+            <div>
             <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-scholarship-{{ scholarship.id }}">
               Edit
             </button>
@@ -82,6 +112,7 @@
             <form method="POST" action="{{ url_for('scholarships.delete_scholarship', scholarship_id=scholarship.id) }}" class="d-inline" onsubmit="return confirm('Delete this scholarship?');">
               <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
             </form>
+            </div>
 
             <div class="collapse mt-3" id="edit-scholarship-{{ scholarship.id }}">
               <form method="POST" action="{{ url_for('scholarships.edit_scholarship', scholarship_id=scholarship.id) }}">
@@ -99,6 +130,10 @@
                 <div class="mb-2">
                   <label class="form-label">Deadline</label>
                   <input type="text" name="deadline" class="form-control" value="{{ scholarship.deadline or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Application Link</label>
+                  <input type="text" name="link" class="form-control" value="{{ scholarship.link or '' }}" placeholder="https://...">
                 </div>
                 <div class="mb-2">
                   <label class="form-label">Status</label>
