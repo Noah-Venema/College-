@@ -235,3 +235,68 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 .role-other {
   background-color: #6c757d;
 }
+
+/* Scholarship status badges */
+.scholarship-status-badge {
+  font-size: 0.75rem;
+}
+
+.scholarship-status-badge.status-not-started {
+  background-color: #6c757d;
+}
+
+.scholarship-status-badge.status-in-progress {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.scholarship-status-badge.status-submitted {
+  background-color: #0d6efd;
+}
+
+.scholarship-status-badge.status-awarded {
+  background-color: #198754;
+}
+
+.scholarship-status-badge.status-rejected {
+  background-color: #dc3545;
+}
+
+/* Financial Aid badges */
+.source-badge {
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.source-fafsa {
+  background-color: var(--navy);
+}
+
+.source-grant {
+  background-color: #198754;
+}
+
+.source-loan {
+  background-color: #dc3545;
+}
+
+.source-work-study {
+  background-color: #0d6efd;
+}
+
+.source-other {
+  background-color: #6c757d;
+}
+
+.aid-status-badge.status-pending {
+  background-color: var(--gold);
+  color: var(--navy-dark);
+}
+
+.aid-status-badge.status-received {
+  background-color: #198754;
+}
+
+.aid-status-badge.status-denied {
+  background-color: #dc3545;
+}
