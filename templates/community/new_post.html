@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}New Post — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5" style="max-width: 640px;">
+  <h1 class="mb-4"><i class="bi bi-pencil-square text-navy"></i> New Post</h1>
+  <div class="card p-4 shadow-sm">
+    <form method="POST" action="{{ url_for('community.new_post') }}">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" placeholder="e.g. What are my chances at UMich?" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Details</label>
+        <textarea name="body" class="form-control" rows="6" placeholder="Share your stats, school list, or question..."></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Visibility</label>
+        <select name="visibility" class="form-select">
+          <option value="public">Public — anyone can see and comment</option>
+          <option value="friends">Friends-Only — only your accepted friends</option>
+        </select>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-gold">Post</button>
+        <a href="{{ url_for('community.feed') }}" class="btn btn-outline-gold">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

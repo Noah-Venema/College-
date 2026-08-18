@@ -13,6 +13,7 @@ SECTIONS = [
     {"name": "Contacts", "endpoint": "contacts.index", "icon": "bi-person-lines-fill", "desc": "Admissions reps, counselors, and other contacts."},
     {"name": "Notes", "endpoint": "notes.board", "icon": "bi-journal-text", "desc": "General notes and reminders."},
     {"name": "Calendar", "endpoint": "calendar.index", "icon": "bi-calendar-event", "desc": "See all your deadlines in one place, syncable with Google/Apple Calendar."},
+    {"name": "Community", "endpoint": "community.feed", "icon": "bi-people", "desc": "Discuss your chances, share your school list, and connect with friends."},
 ]
 
 

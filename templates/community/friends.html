@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Friends — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-person-plus text-navy"></i> Friends</h1>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Find People</h5>
+    <form method="GET" action="{{ url_for('community.friends') }}" class="d-flex gap-2 mb-3">
+      <input type="text" name="q" class="form-control" placeholder="Search by username" value="{{ search_query }}">
+      <button type="submit" class="btn btn-gold">Search</button>
+    </form>
+    {% if search_query %}
+      {% if search_results %}
+        <div class="row g-2">
+          {% for user in search_results %}
+          <div class="col-sm-6 col-lg-4">
+            <div class="d-flex justify-content-between align-items-center border rounded p-2">
+              <span><i class="bi bi-person-circle"></i> {{ user.username }}</span>
+              <form method="POST" action="{{ url_for('community.send_request', user_id=user.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-gold">Add Friend</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">No matching users found.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {% if incoming %}
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Friend Requests</h5>
+    {% for req in incoming %}
+    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+      <span><i class="bi bi-person-circle"></i> {{ req.requester.username }}</span>
+      <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('community.accept_request', friendship_id=req.id) }}">
+          <button type="submit" class="btn btn-sm btn-gold">Accept</button>
+        </form>
+        <form method="POST" action="{{ url_for('community.decline_request', friendship_id=req.id) }}">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Decline</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if outgoing %}
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Pending Sent Requests</h5>
+    {% for req in outgoing %}
+    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+      <span><i class="bi bi-person-circle"></i> {{ req.addressee.username }}</span>
+      <span class="badge source-badge source-other">Pending</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="card p-4 shadow-sm">
+    <h5 class="mb-3">My Friends</h5>
+    {% if friend_entries %}
+      {% for entry in friend_entries %}
+      <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+        <span><i class="bi bi-person-circle"></i> {{ entry.user.username }}</span>
+        <form method="POST" action="{{ url_for('community.remove_friend', friendship_id=entry.friendship_id) }}" onsubmit="return confirm('Remove this friend?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      {{ empty_state("No friends yet — search above to send a request.", "bi-person-plus") }}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

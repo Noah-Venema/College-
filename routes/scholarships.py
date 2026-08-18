@@ -1,7 +1,7 @@
 import re
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app import db
 from models import Scholarship
@@ -81,6 +81,7 @@ def index():
             flash("Name is required.", "danger")
         else:
             scholarship = Scholarship(
+                user_id=current_user.id,
                 name=name,
                 amount=request.form.get("amount", "").strip(),
                 deadline=request.form.get("deadline", "").strip(),
@@ -93,7 +94,7 @@ def index():
             flash("Scholarship added.", "success")
         return redirect(url_for("scholarships.index"))
 
-    all_scholarships = Scholarship.query.order_by(Scholarship.updated_at.desc()).all()
+    all_scholarships = Scholarship.query.filter_by(user_id=current_user.id).order_by(Scholarship.updated_at.desc()).all()
 
     total_applied = sum(_parse_amount(s.amount) for s in all_scholarships)
     total_won = sum(_parse_amount(s.amount) for s in all_scholarships if s.status == "Awarded")
@@ -111,7 +112,7 @@ def index():
 @scholarships_bp.route("/<int:scholarship_id>/edit", methods=["POST"])
 @login_required
 def edit_scholarship(scholarship_id):
-    scholarship = Scholarship.query.get_or_404(scholarship_id)
+    scholarship = Scholarship.query.filter_by(id=scholarship_id, user_id=current_user.id).first_or_404()
     scholarship.name = request.form.get("name", "").strip() or scholarship.name
     scholarship.amount = request.form.get("amount", "").strip()
     scholarship.deadline = request.form.get("deadline", "").strip()
@@ -126,7 +127,7 @@ def edit_scholarship(scholarship_id):
 @scholarships_bp.route("/<int:scholarship_id>/mark-awarded", methods=["POST"])
 @login_required
 def mark_awarded(scholarship_id):
-    scholarship = Scholarship.query.get_or_404(scholarship_id)
+    scholarship = Scholarship.query.filter_by(id=scholarship_id, user_id=current_user.id).first_or_404()
     scholarship.status = "Awarded"
     db.session.commit()
     flash(f'"{scholarship.name}" marked as Awarded! 🎉', "success")
@@ -136,7 +137,7 @@ def mark_awarded(scholarship_id):
 @scholarships_bp.route("/<int:scholarship_id>/delete", methods=["POST"])
 @login_required
 def delete_scholarship(scholarship_id):
-    scholarship = Scholarship.query.get_or_404(scholarship_id)
+    scholarship = Scholarship.query.filter_by(id=scholarship_id, user_id=current_user.id).first_or_404()
     db.session.delete(scholarship)
     db.session.commit()
     flash("Scholarship deleted.", "info")

@@ -31,11 +31,6 @@ def login():
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
-    # Only allow self-registration when no account exists yet (single-user setup).
-    if User.query.count() > 0:
-        flash("An account already exists. Please log in.", "info")
-        return redirect(url_for("auth.login"))
-
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
@@ -45,6 +40,8 @@ def register():
             flash("Username and password are required.", "danger")
         elif password != confirm:
             flash("Passwords do not match.", "danger")
+        elif User.query.filter_by(username=username).first():
+            flash("That username is already taken.", "danger")
         else:
             user = User(username=username)
             user.set_password(password)

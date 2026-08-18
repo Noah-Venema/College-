@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5" style="max-width: 720px;">
+  <a href="{{ url_for('community.feed') }}" class="d-inline-block mb-3 text-decoration-none"><i class="bi bi-arrow-left"></i> Back to Community</a>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-start">
+      <h1 class="mb-1 h3">{{ post.title }}</h1>
+      <span class="badge {{ 'source-badge source-grant' if post.visibility == 'public' else 'source-badge source-loan' }}">
+        <i class="bi {{ 'bi-globe' if post.visibility == 'public' else 'bi-people-fill' }}"></i>
+        {{ 'Public' if post.visibility == 'public' else 'Friends-Only' }}
+      </span>
+    </div>
+    <p class="text-muted mb-3 small">
+      <i class="bi bi-person"></i> {{ post.author.username }} &middot; {{ post.created_at.strftime('%b %-d, %Y') }}
+    </p>
+    {% if post.body %}<p class="mb-3" style="white-space: pre-wrap;">{{ post.body }}</p>{% endif %}
+    {% if post.author_id == current_user.id %}
+    <form method="POST" action="{{ url_for('community.delete_post', post_id=post.id) }}" onsubmit="return confirm('Delete this post?');">
+      <button type="submit" class="btn btn-sm btn-outline-danger">Delete Post</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <h5 class="mb-3"><i class="bi bi-chat-dots"></i> Comments ({{ post.comments|length }})</h5>
+
+  <form method="POST" action="{{ url_for('community.add_comment', post_id=post.id) }}" class="card p-3 shadow-sm mb-4">
+    <textarea name="body" class="form-control mb-2" rows="2" placeholder="Add a comment..." required></textarea>
+    <button type="submit" class="btn btn-sm btn-gold align-self-start">Comment</button>
+  </form>
+
+  {% for comment in post.comments %}
+  <div class="card mb-2 shadow-sm">
+    <div class="card-body py-2">
+      <p class="mb-1 small text-muted"><i class="bi bi-person"></i> {{ comment.author.username }} &middot; {{ comment.created_at.strftime('%b %-d, %Y') }}</p>
+      <p class="mb-0" style="white-space: pre-wrap;">{{ comment.body }}</p>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">No comments yet — start the discussion.</p>
+  {% endfor %}
+</section>
+{% endblock %}

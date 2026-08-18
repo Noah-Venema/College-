@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app import db
 from models import Contact
@@ -16,6 +16,7 @@ def index():
             flash("Name is required.", "danger")
         else:
             contact = Contact(
+                user_id=current_user.id,
                 name=name,
                 role=request.form.get("role", "Other"),
                 organization=request.form.get("organization", "").strip(),
@@ -28,14 +29,14 @@ def index():
             flash("Contact added.", "success")
         return redirect(url_for("contacts.index"))
 
-    all_contacts = Contact.query.order_by(Contact.name.asc()).all()
+    all_contacts = Contact.query.filter_by(user_id=current_user.id).order_by(Contact.name.asc()).all()
     return render_template("contacts.html", contacts=all_contacts, roles=Contact.ROLES)
 
 
 @contacts_bp.route("/<int:contact_id>/edit", methods=["POST"])
 @login_required
 def edit_contact(contact_id):
-    contact = Contact.query.get_or_404(contact_id)
+    contact = Contact.query.filter_by(id=contact_id, user_id=current_user.id).first_or_404()
     contact.name = request.form.get("name", "").strip() or contact.name
     contact.role = request.form.get("role", contact.role)
     contact.organization = request.form.get("organization", "").strip()
@@ -50,7 +51,7 @@ def edit_contact(contact_id):
 @contacts_bp.route("/<int:contact_id>/delete", methods=["POST"])
 @login_required
 def delete_contact(contact_id):
-    contact = Contact.query.get_or_404(contact_id)
+    contact = Contact.query.filter_by(id=contact_id, user_id=current_user.id).first_or_404()
     db.session.delete(contact)
     db.session.commit()
     flash("Contact deleted.", "info")
