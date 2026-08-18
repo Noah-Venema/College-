@@ -411,6 +411,48 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   color: #8a8578;
 }
 
+/* Financial Aid calculator */
+.calculator-card {
+  border-left: 4px solid var(--navy);
+}
+
+.calc-results {
+  border-top: 1px solid #e4dfd3;
+  padding-top: 1rem;
+}
+
+.calc-result-box {
+  text-align: center;
+  padding: 0.75rem;
+  border: 1px solid #e4dfd3;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.calc-result-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8a8578;
+  font-weight: 600;
+}
+
+.calc-result-value {
+  font-family: 'Merriweather', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.calc-result-net {
+  border-color: var(--gold);
+  border-width: 2px;
+}
+
+.calc-result-net .calc-result-value {
+  font-size: 1.6rem;
+}
+
 .scholarship-status-badge.status-not-started {
   background-color: var(--badge-gray);
 }
