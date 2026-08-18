@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 
 from app import db
-from models import School, Matchup, Campus
+from models import School, Matchup, Campus, CreditTransfer
 
 schools_bp = Blueprint("schools", __name__, url_prefix="/schools")
 
@@ -37,12 +37,17 @@ def index():
     all_schools = School.query.filter_by(user_id=current_user.id).order_by(School.name.asc()).all()
     campus_map = _campus_notes_by_school(current_user.id)
     matchups = Matchup.query.filter_by(user_id=current_user.id).order_by(Matchup.created_at.desc()).all()
+    credit_transfers = CreditTransfer.query.filter_by(user_id=current_user.id).order_by(
+        CreditTransfer.school_name.asc(), CreditTransfer.exam_name.asc()
+    ).all()
 
     return render_template(
         "schools.html",
         schools=all_schools,
         campus_map=campus_map,
         matchups=matchups,
+        credit_transfers=credit_transfers,
+        exam_types=CreditTransfer.EXAM_TYPES,
     )
 
 
@@ -107,4 +112,59 @@ def delete_matchup(matchup_id):
     db.session.delete(matchup)
     db.session.commit()
     flash("Matchup deleted.", "info")
+    return redirect(url_for("schools.index"))
+
+
+@schools_bp.route("/credit-transfers", methods=["POST"])
+@login_required
+def add_credit_transfer():
+    school_name = request.form.get("school_name", "").strip()
+    exam_name = request.form.get("exam_name", "").strip()
+    score = request.form.get("score", "").strip()
+
+    if not school_name or not exam_name or not score:
+        flash("School, exam name, and score are required.", "danger")
+    else:
+        entry = CreditTransfer(
+            user_id=current_user.id,
+            school_name=school_name,
+            exam_type=request.form.get("exam_type", "AP"),
+            exam_name=exam_name,
+            score=score,
+            credits_awarded=request.form.get("credits_awarded", "").strip(),
+            course_equivalent=request.form.get("course_equivalent", "").strip(),
+            policy_link=request.form.get("policy_link", "").strip(),
+            notes=request.form.get("notes", "").strip(),
+        )
+        db.session.add(entry)
+        db.session.commit()
+        flash("Credit transfer entry added.", "success")
+
+    return redirect(url_for("schools.index"))
+
+
+@schools_bp.route("/credit-transfers/<int:entry_id>/edit", methods=["POST"])
+@login_required
+def edit_credit_transfer(entry_id):
+    entry = CreditTransfer.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    entry.school_name = request.form.get("school_name", "").strip() or entry.school_name
+    entry.exam_type = request.form.get("exam_type", entry.exam_type)
+    entry.exam_name = request.form.get("exam_name", "").strip() or entry.exam_name
+    entry.score = request.form.get("score", "").strip() or entry.score
+    entry.credits_awarded = request.form.get("credits_awarded", "").strip()
+    entry.course_equivalent = request.form.get("course_equivalent", "").strip()
+    entry.policy_link = request.form.get("policy_link", "").strip()
+    entry.notes = request.form.get("notes", "").strip()
+    db.session.commit()
+    flash("Credit transfer entry updated.", "success")
+    return redirect(url_for("schools.index"))
+
+
+@schools_bp.route("/credit-transfers/<int:entry_id>/delete", methods=["POST"])
+@login_required
+def delete_credit_transfer(entry_id):
+    entry = CreditTransfer.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    db.session.delete(entry)
+    db.session.commit()
+    flash("Credit transfer entry deleted.", "info")
     return redirect(url_for("schools.index"))

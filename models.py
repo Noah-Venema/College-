@@ -229,6 +229,28 @@ class Recommender(db.Model):
     STATUSES = ["Requested", "Received"]
 
 
+class CreditTransfer(db.Model):
+    """A manually-entered record of how a specific exam score transfers to college credit
+    at a specific school. No public API exposes this data reliably across all universities,
+    so this is a personal lookup table the student fills in themselves (e.g. from each
+    school's published transfer credit policy page)."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    school_name = db.Column(db.String(200), nullable=False)
+    exam_type = db.Column(db.String(20), nullable=False, default="AP")
+    exam_name = db.Column(db.String(200), nullable=False)
+    score = db.Column(db.String(20), nullable=False)
+    credits_awarded = db.Column(db.String(50))
+    course_equivalent = db.Column(db.String(200))
+    policy_link = db.Column(db.String(300))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    EXAM_TYPES = ["AP", "IB", "CLEP"]
+
+
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

@@ -175,5 +175,147 @@
   {% else %}
     {{ empty_state("No matchups saved yet.", "bi-arrow-left-right") }}
   {% endif %}
+
+  <h3 class="mb-3 mt-5"><i class="bi bi-mortarboard text-navy"></i> AP/IB/CLEP Credit Transfer</h3>
+  <p class="text-muted small">
+    No public database reliably covers every school's transfer credit policy, so this is a
+    personal lookup you fill in yourself — check each school's registrar/transfer credit page
+    (often searchable as "[School Name] AP credit policy") and log what you find here.
+  </p>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Add Credit Transfer Entry</h5>
+    <form method="POST" action="{{ url_for('schools.add_credit_transfer') }}" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">School</label>
+        <input type="text" name="school_name" class="form-control" list="ct-school-list" required>
+        <datalist id="ct-school-list">
+          {% for school in schools %}
+          <option value="{{ school.name }}">
+          {% endfor %}
+        </datalist>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Exam Type</label>
+        <select name="exam_type" class="form-select">
+          {% for t in exam_types %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Exam / Subject</label>
+        <input type="text" name="exam_name" class="form-control" placeholder="e.g. AP Calculus BC" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Score Needed</label>
+        <input type="text" name="score" class="form-control" placeholder="e.g. 4" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Credits Awarded</label>
+        <input type="text" name="credits_awarded" class="form-control" placeholder="e.g. 4 credits">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Course Equivalent</label>
+        <input type="text" name="course_equivalent" class="form-control" placeholder="e.g. satisfies MATH 201">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Policy Link (optional)</label>
+        <input type="url" name="policy_link" class="form-control" placeholder="https://...">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Notes</label>
+        <input type="text" name="notes" class="form-control">
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-gold">Add Entry</button>
+      </div>
+    </form>
+  </div>
+
+  {% if credit_transfers %}
+  <div class="table-responsive mb-5">
+    <table class="table align-middle bg-white shadow-sm rounded">
+      <thead>
+        <tr>
+          <th>School</th>
+          <th>Exam</th>
+          <th>Score</th>
+          <th>Credits</th>
+          <th>Course Equivalent</th>
+          <th>Policy</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in credit_transfers %}
+        <tr>
+          <td><strong>{{ entry.school_name }}</strong></td>
+          <td><span class="badge bg-secondary">{{ entry.exam_type }}</span> {{ entry.exam_name }}</td>
+          <td>{{ entry.score }}</td>
+          <td>{{ entry.credits_awarded or '—' }}</td>
+          <td>{{ entry.course_equivalent or '—' }}</td>
+          <td>
+            {% if entry.policy_link %}
+            <a href="{{ entry.policy_link }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> View</a>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ entry.notes or '—' }}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-ct-{{ entry.id }}">Edit</button>
+            <form method="POST" action="{{ url_for('schools.delete_credit_transfer', entry_id=entry.id) }}" class="d-inline" onsubmit="return confirm('Delete this entry?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <tr class="collapse" id="edit-ct-{{ entry.id }}">
+          <td colspan="8">
+            <form method="POST" action="{{ url_for('schools.edit_credit_transfer', entry_id=entry.id) }}" class="row g-2 align-items-end">
+              <div class="col-md-2">
+                <label class="form-label">School</label>
+                <input type="text" name="school_name" class="form-control form-control-sm" value="{{ entry.school_name }}" required>
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">Type</label>
+                <select name="exam_type" class="form-select form-select-sm">
+                  {% for t in exam_types %}
+                  <option value="{{ t }}" {% if entry.exam_type == t %}selected{% endif %}>{{ t }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Exam</label>
+                <input type="text" name="exam_name" class="form-control form-control-sm" value="{{ entry.exam_name }}" required>
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">Score</label>
+                <input type="text" name="score" class="form-control form-control-sm" value="{{ entry.score }}" required>
+              </div>
+              <div class="col-md-1">
+                <label class="form-label">Credits</label>
+                <input type="text" name="credits_awarded" class="form-control form-control-sm" value="{{ entry.credits_awarded or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Equivalent</label>
+                <input type="text" name="course_equivalent" class="form-control form-control-sm" value="{{ entry.course_equivalent or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Policy Link</label>
+                <input type="url" name="policy_link" class="form-control form-control-sm" value="{{ entry.policy_link or '' }}">
+              </div>
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-gold btn-sm w-100">Save</button>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {{ empty_state("No credit transfer entries yet — add one above.", "bi-mortarboard") }}
+  {% endif %}
 </section>
 {% endblock %}
