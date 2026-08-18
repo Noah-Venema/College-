@@ -758,3 +758,11 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   font-weight: 700;
 }
 
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: -4px;
+  font-size: 0.65rem;
+  padding: 0.2em 0.45em;
+}

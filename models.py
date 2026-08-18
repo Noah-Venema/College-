@@ -14,6 +14,8 @@ class User(UserMixin, db.Model):
     # Unguessable token used to authenticate the calendar .ics feed URL,
     # since external calendar apps (Google/Apple) can't send a login session.
     calendar_token = db.Column(db.String(64), unique=True, default=lambda: uuid.uuid4().hex)
+    email = db.Column(db.String(200))
+    email_notifications_enabled = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -225,6 +227,23 @@ class Recommender(db.Model):
 
     ROLES = ["Teacher", "Counselor", "Other"]
     STATUSES = ["Requested", "Received"]
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    message = db.Column(db.String(300), nullable=False)
+    link = db.Column(db.String(300))
+    category = db.Column(db.String(30), nullable=False, default="General")
+    # Dedupe key so the same underlying event (e.g. "deadline:12" or "recommender:5:Received")
+    # doesn't generate a duplicate notification every time the sync check runs.
+    dedupe_key = db.Column(db.String(120), nullable=False)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "dedupe_key", name="uq_notification_user_dedupe"),
+    )
 
 
 class Friendship(db.Model):
