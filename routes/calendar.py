@@ -27,6 +27,7 @@ def index():
                 return redirect(url_for("calendar.index"))
 
             deadline = Deadline(
+                user_id=current_user.id,
                 title=title,
                 date=parsed_date,
                 category=request.form.get("category", "Other"),
@@ -37,7 +38,7 @@ def index():
             flash("Deadline added.", "success")
         return redirect(url_for("calendar.index"))
 
-    all_deadlines = Deadline.query.order_by(Deadline.date.asc()).all()
+    all_deadlines = Deadline.query.filter_by(user_id=current_user.id).order_by(Deadline.date.asc()).all()
     feed_url = url_for(
         "calendar.feed", token=current_user.calendar_token, _external=True
     )
@@ -63,7 +64,7 @@ def index():
 @calendar_bp.route("/<int:deadline_id>/edit", methods=["POST"])
 @login_required
 def edit_deadline(deadline_id):
-    deadline = Deadline.query.get_or_404(deadline_id)
+    deadline = Deadline.query.filter_by(id=deadline_id, user_id=current_user.id).first_or_404()
     deadline.title = request.form.get("title", "").strip() or deadline.title
     date_str = request.form.get("date", "").strip()
     if date_str:
@@ -82,7 +83,7 @@ def edit_deadline(deadline_id):
 @calendar_bp.route("/<int:deadline_id>/delete", methods=["POST"])
 @login_required
 def delete_deadline(deadline_id):
-    deadline = Deadline.query.get_or_404(deadline_id)
+    deadline = Deadline.query.filter_by(id=deadline_id, user_id=current_user.id).first_or_404()
     db.session.delete(deadline)
     db.session.commit()
     flash("Deadline deleted.", "info")
@@ -104,7 +105,7 @@ def feed(token):
     if user is None:
         abort(404)
 
-    deadlines = Deadline.query.order_by(Deadline.date.asc()).all()
+    deadlines = Deadline.query.filter_by(user_id=user.id).order_by(Deadline.date.asc()).all()
 
     lines = [
         "BEGIN:VCALENDAR",

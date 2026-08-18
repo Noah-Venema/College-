@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Community — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <h1 class="mb-0"><i class="bi bi-people text-navy"></i> Community</h1>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('community.friends') }}" class="btn btn-outline-gold"><i class="bi bi-person-plus"></i> Friends</a>
+      <a href="{{ url_for('community.new_post') }}" class="btn btn-gold"><i class="bi bi-plus-lg"></i> New Post</a>
+    </div>
+  </div>
+
+  <div class="btn-group mb-4" role="group">
+    <a href="{{ url_for('community.feed', filter='all') }}" class="btn btn-sm {{ 'btn-gold' if filter_type == 'all' else 'btn-outline-gold' }}">All</a>
+    <a href="{{ url_for('community.feed', filter='public') }}" class="btn btn-sm {{ 'btn-gold' if filter_type == 'public' else 'btn-outline-gold' }}">Public</a>
+    <a href="{{ url_for('community.feed', filter='friends') }}" class="btn btn-sm {{ 'btn-gold' if filter_type == 'friends' else 'btn-outline-gold' }}">Friends-Only</a>
+  </div>
+
+  {% if posts %}
+    {% for post in posts %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h5 class="card-title mb-1">
+            <a href="{{ url_for('community.view_post', post_id=post.id) }}" class="text-decoration-none text-navy">{{ post.title }}</a>
+          </h5>
+          <span class="badge {{ 'source-badge source-grant' if post.visibility == 'public' else 'source-badge source-loan' }}">
+            <i class="bi {{ 'bi-globe' if post.visibility == 'public' else 'bi-people-fill' }}"></i>
+            {{ 'Public' if post.visibility == 'public' else 'Friends-Only' }}
+          </span>
+        </div>
+        <p class="text-muted mb-2 small">
+          <i class="bi bi-person"></i> {{ post.author.username }} &middot; {{ post.created_at.strftime('%b %-d, %Y') }}
+        </p>
+        {% if post.body %}<p class="mb-2">{{ post.body[:200] }}{% if post.body|length > 200 %}...{% endif %}</p>{% endif %}
+        <a href="{{ url_for('community.view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-gold">
+          <i class="bi bi-chat-dots"></i> {{ post.comments|length }} Comment{{ 's' if post.comments|length != 1 else '' }}
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    {{ empty_state("No posts yet — be the first to share your school list or ask about your chances.", "bi-people") }}
+  {% endif %}
+</section>
+{% endblock %}

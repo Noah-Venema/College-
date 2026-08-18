@@ -43,6 +43,7 @@ def create_app():
     from routes.scholarships import scholarships_bp
     from routes.financial_aid import financial_aid_bp
     from routes.calendar import calendar_bp
+    from routes.community import community_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -54,6 +55,7 @@ def create_app():
     app.register_blueprint(scholarships_bp)
     app.register_blueprint(financial_aid_bp)
     app.register_blueprint(calendar_bp)
+    app.register_blueprint(community_bp)
 
     @app.context_processor
     def inject_globals():

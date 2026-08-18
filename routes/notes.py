@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app import db
 from models import Task
@@ -16,6 +16,7 @@ def board():
             flash("Title is required.", "danger")
         else:
             task = Task(
+                user_id=current_user.id,
                 title=title,
                 description=request.form.get("description", "").strip(),
                 status="To-Do",
@@ -26,7 +27,7 @@ def board():
         return redirect(url_for("notes.board"))
 
     columns = {status: [] for status in Task.STATUSES}
-    for task in Task.query.order_by(Task.updated_at.desc()).all():
+    for task in Task.query.filter_by(user_id=current_user.id).order_by(Task.updated_at.desc()).all():
         columns.setdefault(task.status, []).append(task)
 
     return render_template("notes.html", columns=columns, statuses=Task.STATUSES)
@@ -35,7 +36,7 @@ def board():
 @notes_bp.route("/<int:task_id>/move", methods=["POST"])
 @login_required
 def move_task(task_id):
-    task = Task.query.get_or_404(task_id)
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     new_status = request.form.get("status")
     if new_status in Task.STATUSES:
         task.status = new_status
@@ -46,7 +47,7 @@ def move_task(task_id):
 @notes_bp.route("/<int:task_id>/edit", methods=["POST"])
 @login_required
 def edit_task(task_id):
-    task = Task.query.get_or_404(task_id)
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     task.title = request.form.get("title", "").strip() or task.title
     task.description = request.form.get("description", "").strip()
     db.session.commit()
@@ -57,7 +58,7 @@ def edit_task(task_id):
 @notes_bp.route("/<int:task_id>/delete", methods=["POST"])
 @login_required
 def delete_task(task_id):
-    task = Task.query.get_or_404(task_id)
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
     db.session.delete(task)
     db.session.commit()
     flash("Task deleted.", "info")

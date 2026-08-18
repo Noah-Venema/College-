@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app import db
 from models import School, Matchup, Campus
@@ -7,9 +7,9 @@ from models import School, Matchup, Campus
 schools_bp = Blueprint("schools", __name__, url_prefix="/schools")
 
 
-def _campus_notes_by_school():
+def _campus_notes_by_school(user_id):
     """Maps lowercased school name -> Campus record, for pulling in campus-life notes."""
-    return {c.school_name.strip().lower(): c for c in Campus.query.all()}
+    return {c.school_name.strip().lower(): c for c in Campus.query.filter_by(user_id=user_id).all()}
 
 
 @schools_bp.route("/", methods=["GET", "POST"])
@@ -21,6 +21,7 @@ def index():
             flash("School name is required.", "danger")
         else:
             school = School(
+                user_id=current_user.id,
                 name=name,
                 location=request.form.get("location", "").strip(),
                 size=request.form.get("size", "").strip(),
@@ -33,9 +34,9 @@ def index():
             flash("School added.", "success")
         return redirect(url_for("schools.index"))
 
-    all_schools = School.query.order_by(School.name.asc()).all()
-    campus_map = _campus_notes_by_school()
-    matchups = Matchup.query.order_by(Matchup.created_at.desc()).all()
+    all_schools = School.query.filter_by(user_id=current_user.id).order_by(School.name.asc()).all()
+    campus_map = _campus_notes_by_school(current_user.id)
+    matchups = Matchup.query.filter_by(user_id=current_user.id).order_by(Matchup.created_at.desc()).all()
 
     return render_template(
         "schools.html",
@@ -48,7 +49,7 @@ def index():
 @schools_bp.route("/<int:school_id>/edit", methods=["POST"])
 @login_required
 def edit_school(school_id):
-    school = School.query.get_or_404(school_id)
+    school = School.query.filter_by(id=school_id, user_id=current_user.id).first_or_404()
     school.name = request.form.get("name", "").strip() or school.name
     school.location = request.form.get("location", "").strip()
     school.size = request.form.get("size", "").strip()
@@ -63,10 +64,11 @@ def edit_school(school_id):
 @schools_bp.route("/<int:school_id>/delete", methods=["POST"])
 @login_required
 def delete_school(school_id):
-    school = School.query.get_or_404(school_id)
+    school = School.query.filter_by(id=school_id, user_id=current_user.id).first_or_404()
     # Remove any matchups referencing this school first to avoid orphaned rows.
     Matchup.query.filter(
-        (Matchup.school_a_id == school_id) | (Matchup.school_b_id == school_id)
+        (Matchup.school_a_id == school_id) | (Matchup.school_b_id == school_id),
+        Matchup.user_id == current_user.id,
     ).delete()
     db.session.delete(school)
     db.session.commit()
@@ -86,6 +88,7 @@ def add_matchup():
         flash("Please choose two different schools.", "danger")
     else:
         matchup = Matchup(
+            user_id=current_user.id,
             school_a_id=school_a_id,
             school_b_id=school_b_id,
             notes=request.form.get("notes", "").strip(),
@@ -100,7 +103,7 @@ def add_matchup():
 @schools_bp.route("/matchups/<int:matchup_id>/delete", methods=["POST"])
 @login_required
 def delete_matchup(matchup_id):
-    matchup = Matchup.query.get_or_404(matchup_id)
+    matchup = Matchup.query.filter_by(id=matchup_id, user_id=current_user.id).first_or_404()
     db.session.delete(matchup)
     db.session.commit()
     flash("Matchup deleted.", "info")

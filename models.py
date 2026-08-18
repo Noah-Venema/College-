@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
 
 class Essay(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     prompt = db.Column(db.Text)
     school_name = db.Column(db.String(200))
@@ -38,6 +39,7 @@ class Essay(db.Model):
 
 class Honor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     level = db.Column(db.String(30), nullable=False, default="School")
     date_received = db.Column(db.String(20))
@@ -50,6 +52,7 @@ class Honor(db.Model):
 
 class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     level = db.Column(db.String(30), nullable=False, default="School")
     years_participated = db.Column(db.String(50))
@@ -62,6 +65,7 @@ class Activity(db.Model):
 
 class SchoolProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     high_school_name = db.Column(db.String(200))
     gpa = db.Column(db.String(10))
     class_size = db.Column(db.String(20))
@@ -70,6 +74,7 @@ class SchoolProfile(db.Model):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     grade = db.Column(db.String(10))
     term = db.Column(db.String(50))
@@ -82,6 +87,7 @@ class Course(db.Model):
 
 class TestEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     test_name = db.Column(db.String(100), nullable=False)
     date_taken = db.Column(db.String(20))
     score = db.Column(db.String(30))
@@ -94,6 +100,7 @@ class TestEntry(db.Model):
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     status = db.Column(db.String(20), nullable=False, default="To-Do")
@@ -105,6 +112,7 @@ class Task(db.Model):
 
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(30), nullable=False, default="Other")
     organization = db.Column(db.String(200))
@@ -119,6 +127,7 @@ class Contact(db.Model):
 
 class Campus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     school_name = db.Column(db.String(200), nullable=False)
     housing_info = db.Column(db.Text)
     food_info = db.Column(db.Text)
@@ -130,6 +139,7 @@ class Campus(db.Model):
 
 class School(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(200))
     size = db.Column(db.String(50))
@@ -142,6 +152,7 @@ class School(db.Model):
 
 class Matchup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     school_a_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
     school_b_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
     notes = db.Column(db.Text)
@@ -153,6 +164,7 @@ class Matchup(db.Model):
 
 class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     amount = db.Column(db.String(30))
     deadline = db.Column(db.String(20))
@@ -167,6 +179,7 @@ class Scholarship(db.Model):
 
 class FinancialAid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     source = db.Column(db.String(30), nullable=False, default="Other")
     name = db.Column(db.String(200))
     amount = db.Column(db.String(30))
@@ -181,6 +194,7 @@ class FinancialAid(db.Model):
 
 class Deadline(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
     category = db.Column(db.String(30), nullable=False, default="Other")
@@ -189,3 +203,48 @@ class Deadline(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     CATEGORIES = ["Task", "Scholarship", "Application", "Financial Aid", "Other"]
+
+
+class Friendship(db.Model):
+    """A directed friend request; status becomes 'accepted' once the addressee approves."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    requester_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    addressee_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    requester = db.relationship("User", foreign_keys=[requester_id])
+    addressee = db.relationship("User", foreign_keys=[addressee_id])
+
+    STATUSES = ["pending", "accepted", "declined"]
+
+    __table_args__ = (db.UniqueConstraint("requester_id", "addressee_id", name="uq_friend_pair"),)
+
+
+class Post(db.Model):
+    """A community post (school-chances discussion, etc.), public or friends-only."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text)
+    visibility = db.Column(db.String(20), nullable=False, default="public")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    author = db.relationship("User", foreign_keys=[author_id])
+
+    VISIBILITIES = ["public", "friends"]
+
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    author = db.relationship("User", foreign_keys=[author_id])
+    post = db.relationship("Post", backref=db.backref("comments", order_by="Comment.created_at", cascade="all, delete-orphan"))

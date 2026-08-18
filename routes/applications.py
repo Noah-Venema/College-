@@ -2,7 +2,7 @@ import os
 import uuid
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_from_directory
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app import db
@@ -35,6 +35,7 @@ def essays():
             flash("Title is required.", "danger")
         else:
             essay = Essay(
+                user_id=current_user.id,
                 title=title,
                 prompt=request.form.get("prompt", "").strip(),
                 school_name=request.form.get("school_name", "").strip(),
@@ -46,7 +47,7 @@ def essays():
             flash("Essay added.", "success")
         return redirect(url_for("applications.essays"))
 
-    all_essays = Essay.query.order_by(Essay.updated_at.desc()).all()
+    all_essays = Essay.query.filter_by(user_id=current_user.id).order_by(Essay.updated_at.desc()).all()
     return render_template(
         "applications/essays.html",
         tabs=APP_TABS,
@@ -59,7 +60,7 @@ def essays():
 @applications_bp.route("/essays/<int:essay_id>/edit", methods=["POST"])
 @login_required
 def edit_essay(essay_id):
-    essay = Essay.query.get_or_404(essay_id)
+    essay = Essay.query.filter_by(id=essay_id, user_id=current_user.id).first_or_404()
     essay.title = request.form.get("title", "").strip() or essay.title
     essay.prompt = request.form.get("prompt", "").strip()
     essay.school_name = request.form.get("school_name", "").strip()
@@ -73,7 +74,7 @@ def edit_essay(essay_id):
 @applications_bp.route("/essays/<int:essay_id>/delete", methods=["POST"])
 @login_required
 def delete_essay(essay_id):
-    essay = Essay.query.get_or_404(essay_id)
+    essay = Essay.query.filter_by(id=essay_id, user_id=current_user.id).first_or_404()
     db.session.delete(essay)
     db.session.commit()
     flash("Essay deleted.", "info")
@@ -90,6 +91,7 @@ def honors():
             flash("Title is required.", "danger")
         else:
             honor = Honor(
+                user_id=current_user.id,
                 title=title,
                 level=request.form.get("level", "School"),
                 date_received=request.form.get("date_received", "").strip(),
@@ -100,7 +102,7 @@ def honors():
             flash("Honor/Award added.", "success")
         return redirect(url_for("applications.honors"))
 
-    all_honors = Honor.query.order_by(Honor.updated_at.desc()).all()
+    all_honors = Honor.query.filter_by(user_id=current_user.id).order_by(Honor.updated_at.desc()).all()
     return render_template(
         "applications/honors.html",
         tabs=APP_TABS,
@@ -113,7 +115,7 @@ def honors():
 @applications_bp.route("/honors/<int:honor_id>/edit", methods=["POST"])
 @login_required
 def edit_honor(honor_id):
-    honor = Honor.query.get_or_404(honor_id)
+    honor = Honor.query.filter_by(id=honor_id, user_id=current_user.id).first_or_404()
     honor.title = request.form.get("title", "").strip() or honor.title
     honor.level = request.form.get("level", honor.level)
     honor.date_received = request.form.get("date_received", "").strip()
@@ -126,7 +128,7 @@ def edit_honor(honor_id):
 @applications_bp.route("/honors/<int:honor_id>/delete", methods=["POST"])
 @login_required
 def delete_honor(honor_id):
-    honor = Honor.query.get_or_404(honor_id)
+    honor = Honor.query.filter_by(id=honor_id, user_id=current_user.id).first_or_404()
     db.session.delete(honor)
     db.session.commit()
     flash("Honor/Award deleted.", "info")
@@ -142,6 +144,7 @@ def activities():
             flash("Title is required.", "danger")
         else:
             activity = Activity(
+                user_id=current_user.id,
                 title=title,
                 level=request.form.get("level", "School"),
                 years_participated=request.form.get("years_participated", "").strip(),
@@ -152,7 +155,7 @@ def activities():
             flash("Activity added.", "success")
         return redirect(url_for("applications.activities"))
 
-    all_activities = Activity.query.order_by(Activity.updated_at.desc()).all()
+    all_activities = Activity.query.filter_by(user_id=current_user.id).order_by(Activity.updated_at.desc()).all()
     return render_template(
         "applications/activities.html",
         tabs=APP_TABS,
@@ -165,7 +168,7 @@ def activities():
 @applications_bp.route("/activities/<int:activity_id>/edit", methods=["POST"])
 @login_required
 def edit_activity(activity_id):
-    activity = Activity.query.get_or_404(activity_id)
+    activity = Activity.query.filter_by(id=activity_id, user_id=current_user.id).first_or_404()
     activity.title = request.form.get("title", "").strip() or activity.title
     activity.level = request.form.get("level", activity.level)
     activity.years_participated = request.form.get("years_participated", "").strip()
@@ -178,7 +181,7 @@ def edit_activity(activity_id):
 @applications_bp.route("/activities/<int:activity_id>/delete", methods=["POST"])
 @login_required
 def delete_activity(activity_id):
-    activity = Activity.query.get_or_404(activity_id)
+    activity = Activity.query.filter_by(id=activity_id, user_id=current_user.id).first_or_404()
     db.session.delete(activity)
     db.session.commit()
     flash("Activity deleted.", "info")
@@ -188,9 +191,9 @@ def delete_activity(activity_id):
 @applications_bp.route("/school-info", methods=["GET", "POST"])
 @login_required
 def school_info():
-    profile = SchoolProfile.query.first()
+    profile = SchoolProfile.query.filter_by(user_id=current_user.id).first()
     if profile is None:
-        profile = SchoolProfile()
+        profile = SchoolProfile(user_id=current_user.id)
         db.session.add(profile)
         db.session.commit()
 
@@ -202,7 +205,7 @@ def school_info():
         flash("Profile updated.", "success")
         return redirect(url_for("applications.school_info"))
 
-    all_courses = Course.query.order_by(Course.updated_at.desc()).all()
+    all_courses = Course.query.filter_by(user_id=current_user.id).order_by(Course.updated_at.desc()).all()
     return render_template(
         "applications/school_info.html",
         tabs=APP_TABS,
@@ -221,6 +224,7 @@ def add_course():
         flash("Course name is required.", "danger")
     else:
         course = Course(
+            user_id=current_user.id,
             name=name,
             grade=request.form.get("grade", "").strip(),
             term=request.form.get("term", "").strip(),
@@ -235,7 +239,7 @@ def add_course():
 @applications_bp.route("/school-info/courses/<int:course_id>/edit", methods=["POST"])
 @login_required
 def edit_course(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = Course.query.filter_by(id=course_id, user_id=current_user.id).first_or_404()
     course.name = request.form.get("name", "").strip() or course.name
     course.grade = request.form.get("grade", "").strip()
     course.term = request.form.get("term", "").strip()
@@ -248,7 +252,7 @@ def edit_course(course_id):
 @applications_bp.route("/school-info/courses/<int:course_id>/delete", methods=["POST"])
 @login_required
 def delete_course(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = Course.query.filter_by(id=course_id, user_id=current_user.id).first_or_404()
     db.session.delete(course)
     db.session.commit()
     flash("Course deleted.", "info")
@@ -285,6 +289,7 @@ def testing():
         else:
             stored_name, original_name = _save_upload(request.files.get("proof_file"))
             entry = TestEntry(
+                user_id=current_user.id,
                 test_name=test_name,
                 date_taken=request.form.get("date_taken", "").strip(),
                 score=request.form.get("score", "").strip(),
@@ -297,7 +302,7 @@ def testing():
             flash("Test entry added.", "success")
         return redirect(url_for("applications.testing"))
 
-    all_tests = TestEntry.query.order_by(TestEntry.updated_at.desc()).all()
+    all_tests = TestEntry.query.filter_by(user_id=current_user.id).order_by(TestEntry.updated_at.desc()).all()
     return render_template(
         "applications/testing.html",
         tabs=APP_TABS,
@@ -309,7 +314,7 @@ def testing():
 @applications_bp.route("/testing/<int:test_id>/edit", methods=["POST"])
 @login_required
 def edit_test(test_id):
-    entry = TestEntry.query.get_or_404(test_id)
+    entry = TestEntry.query.filter_by(id=test_id, user_id=current_user.id).first_or_404()
     entry.test_name = request.form.get("test_name", "").strip() or entry.test_name
     entry.date_taken = request.form.get("date_taken", "").strip()
     entry.score = request.form.get("score", "").strip()
@@ -333,7 +338,7 @@ def edit_test(test_id):
 @applications_bp.route("/testing/<int:test_id>/delete", methods=["POST"])
 @login_required
 def delete_test(test_id):
-    entry = TestEntry.query.get_or_404(test_id)
+    entry = TestEntry.query.filter_by(id=test_id, user_id=current_user.id).first_or_404()
     if entry.file_path:
         old_path = os.path.join(current_app.config["UPLOAD_FOLDER"], entry.file_path)
         if os.path.exists(old_path):
