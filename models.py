@@ -14,6 +14,8 @@ class User(UserMixin, db.Model):
     # Unguessable token used to authenticate the calendar .ics feed URL,
     # since external calendar apps (Google/Apple) can't send a login session.
     calendar_token = db.Column(db.String(64), unique=True, default=lambda: uuid.uuid4().hex)
+    email = db.Column(db.String(200))
+    email_notifications_enabled = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
@@ -203,6 +205,67 @@ class Deadline(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     CATEGORIES = ["Task", "Scholarship", "Application", "Financial Aid", "Other"]
+
+
+class Recommender(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(200))
+    role = db.Column(db.String(30), nullable=False, default="Teacher")
+    school_name = db.Column(db.String(200))
+    status = db.Column(db.String(20), nullable=False, default="Requested")
+    # Unguessable token so the recommender can access their portal link without an account.
+    token = db.Column(db.String(64), unique=True, default=lambda: uuid.uuid4().hex)
+    letter_path = db.Column(db.String(300))
+    letter_original_filename = db.Column(db.String(200))
+    notes = db.Column(db.Text)
+    requested_at = db.Column(db.DateTime, default=datetime.utcnow)
+    received_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    ROLES = ["Teacher", "Counselor", "Other"]
+    STATUSES = ["Requested", "Received"]
+
+
+class CreditTransfer(db.Model):
+    """A manually-entered record of how a specific exam score transfers to college credit
+    at a specific school. No public API exposes this data reliably across all universities,
+    so this is a personal lookup table the student fills in themselves (e.g. from each
+    school's published transfer credit policy page)."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    school_name = db.Column(db.String(200), nullable=False)
+    exam_type = db.Column(db.String(20), nullable=False, default="AP")
+    exam_name = db.Column(db.String(200), nullable=False)
+    score = db.Column(db.String(20), nullable=False)
+    credits_awarded = db.Column(db.String(50))
+    course_equivalent = db.Column(db.String(200))
+    policy_link = db.Column(db.String(300))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    EXAM_TYPES = ["AP", "IB", "CLEP"]
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    message = db.Column(db.String(300), nullable=False)
+    link = db.Column(db.String(300))
+    category = db.Column(db.String(30), nullable=False, default="General")
+    # Dedupe key so the same underlying event (e.g. "deadline:12" or "recommender:5:Received")
+    # doesn't generate a duplicate notification every time the sync check runs.
+    dedupe_key = db.Column(db.String(120), nullable=False)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "dedupe_key", name="uq_notification_user_dedupe"),
+    )
 
 
 class Friendship(db.Model):

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Notifications — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-bell text-navy"></i> Notifications</h3>
+    <div>
+      <a href="{{ url_for('notifications.settings') }}" class="btn btn-outline-secondary btn-sm me-2">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+      {% if notifications and notifications | selectattr('is_read', 'equalto', false) | list %}
+      <form method="POST" action="{{ url_for('notifications.mark_all_read') }}" class="d-inline">
+        <button type="submit" class="btn btn-outline-navy btn-sm">Mark all as read</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if notifications %}
+  <div class="list-group shadow-sm">
+    {% for n in notifications %}
+    <div class="list-group-item d-flex justify-content-between align-items-start {% if not n.is_read %}list-group-item-light fw-semibold{% endif %}">
+      <div>
+        <span class="badge bg-secondary me-2">{{ n.category }}</span>
+        {% if n.link %}
+          <a href="{{ n.link }}" class="text-decoration-none">{{ n.message }}</a>
+        {% else %}
+          {{ n.message }}
+        {% endif %}
+        <div class="text-muted small">{{ n.created_at.strftime('%b %d, %Y %I:%M %p') }}</div>
+      </div>
+      {% if not n.is_read %}
+      <form method="POST" action="{{ url_for('notifications.mark_read', notification_id=n.id) }}">
+        <button type="submit" class="btn btn-sm btn-link">Mark read</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">You're all caught up — no notifications yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

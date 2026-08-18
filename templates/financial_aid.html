@@ -99,6 +99,116 @@
     </div>
   </div>
 
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm h-100 calculator-card">
+        <h5 class="mb-2"><i class="bi bi-cash-stack"></i> Pell Grant / SAI Ballpark Estimator</h5>
+        <p class="text-muted small mb-3">
+          This gives a rough planning estimate only — it is <strong>not</strong> an official aid determination.
+          For your real Student Aid Index, use the
+          <a href="https://studentaid.gov/aid-estimator/" target="_blank" rel="noopener noreferrer">official Federal Student Aid Estimator</a>.
+        </p>
+        <div class="mb-2">
+          <label class="form-label">Household Size (not counting you)</label>
+          <input type="number" min="1" step="1" class="form-control pell-input" id="pell-family-size" value="4">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Parent + Student Combined AGI</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" min="0" step="1" class="form-control pell-input" id="pell-income" placeholder="0">
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Reportable Assets (savings/investments, not retirement/home)</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" min="0" step="1" class="form-control pell-input" id="pell-assets" placeholder="0">
+          </div>
+        </div>
+        <details class="mb-3">
+          <summary class="text-muted small" style="cursor: pointer;">Advanced assumptions (editable)</summary>
+          <div class="mt-2">
+            <label class="form-label small">Income Protection Allowance</label>
+            <div class="input-group input-group-sm mb-2">
+              <span class="input-group-text">$</span>
+              <input type="number" min="0" step="1" class="form-control pell-input" id="pell-ipa" value="35870">
+            </div>
+            <label class="form-label small">Assessment Rate on Available Income (%)</label>
+            <div class="input-group input-group-sm mb-2">
+              <input type="number" min="0" max="47" step="1" class="form-control pell-input" id="pell-rate" value="25">
+              <span class="input-group-text">%</span>
+            </div>
+            <label class="form-label small">Max Pell Grant (current award year)</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">$</span>
+              <input type="number" min="0" step="1" class="form-control pell-input" id="pell-max" value="7395">
+            </div>
+          </div>
+        </details>
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="calc-result-box">
+              <div class="calc-result-label">Est. SAI</div>
+              <div class="calc-result-value" id="pell-sai">$0</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="calc-result-box calc-result-net">
+              <div class="calc-result-label">Est. Pell Grant</div>
+              <div class="calc-result-value" id="pell-grant">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm h-100 calculator-card">
+        <h5 class="mb-2"><i class="bi bi-graph-down-arrow"></i> Loan Repayment Simulator</h5>
+        <p class="text-muted small mb-3">See what your monthly payment could look like after graduation.</p>
+        <div class="mb-2">
+          <label class="form-label">Total Loan Amount</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" min="0" step="1" class="form-control loan-input" id="loan-amount" placeholder="0">
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Interest Rate (%)</label>
+          <div class="input-group">
+            <input type="number" min="0" step="0.01" class="form-control loan-input" id="loan-rate" placeholder="5.5">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Repayment Term (years)</label>
+          <input type="number" min="1" step="1" class="form-control loan-input" id="loan-term" value="10">
+        </div>
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="calc-result-box">
+              <div class="calc-result-label">Monthly Payment</div>
+              <div class="calc-result-value" id="loan-monthly">$0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="calc-result-box">
+              <div class="calc-result-label">Total Interest</div>
+              <div class="calc-result-value" id="loan-interest">$0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="calc-result-box">
+              <div class="calc-result-label">Total Paid</div>
+              <div class="calc-result-value" id="loan-total">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="row g-4">
     <div class="col-lg-5">
       <div class="card p-4 shadow-sm">
@@ -246,5 +356,58 @@
   });
 
   recalcCalculator();
+
+  function recalcPell() {
+    const familySize = num('pell-family-size');
+    const income = num('pell-income');
+    const assets = num('pell-assets');
+    const ipa = num('pell-ipa');
+    const rate = num('pell-rate') / 100;
+    const maxPell = num('pell-max');
+
+    const availableIncome = Math.max(0, income - ipa);
+    const sai = Math.max(0, Math.round(availableIncome * rate + assets * 0.12));
+    const pellEstimate = Math.max(0, Math.min(maxPell, maxPell - sai));
+
+    document.getElementById('pell-sai').textContent = '$' + sai.toLocaleString('en-US');
+    document.getElementById('pell-grant').textContent = '$' + Math.round(pellEstimate).toLocaleString('en-US');
+    // family size doesn't directly factor into this simplified formula beyond informing the IPA the
+    // student enters manually — kept as an input for context/future refinement.
+    void familySize;
+  }
+
+  document.querySelectorAll('.pell-input').forEach((input) => {
+    input.addEventListener('input', recalcPell);
+  });
+  recalcPell();
+
+  function recalcLoan() {
+    const principal = num('loan-amount');
+    const annualRate = num('loan-rate') / 100;
+    const years = num('loan-term');
+    const months = years * 12;
+    const monthlyRate = annualRate / 12;
+
+    let monthlyPayment = 0;
+    if (principal > 0 && months > 0) {
+      if (monthlyRate === 0) {
+        monthlyPayment = principal / months;
+      } else {
+        const factor = Math.pow(1 + monthlyRate, months);
+        monthlyPayment = (principal * monthlyRate * factor) / (factor - 1);
+      }
+    }
+    const totalPaid = monthlyPayment * months;
+    const totalInterest = totalPaid - principal;
+
+    document.getElementById('loan-monthly').textContent = formatCurrency(monthlyPayment || 0);
+    document.getElementById('loan-total').textContent = formatCurrency(totalPaid || 0);
+    document.getElementById('loan-interest').textContent = formatCurrency(totalInterest > 0 ? totalInterest : 0);
+  }
+
+  document.querySelectorAll('.loan-input').forEach((input) => {
+    input.addEventListener('input', recalcLoan);
+  });
+  recalcLoan();
 </script>
 {% endblock %}

@@ -33,6 +33,14 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('notes.board') }}">Notes</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('calendar.index') }}">Calendar</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('community.feed') }}">Community</a></li>
+        <li class="nav-item">
+          <a class="nav-link position-relative" href="{{ url_for('notifications.index') }}">
+            <i class="bi bi-bell"></i>
+            {% if unread_notification_count %}
+            <span class="badge rounded-pill bg-danger notification-badge">{{ unread_notification_count }}</span>
+            {% endif %}
+          </a>
+        </li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
       </ul>
     </div>

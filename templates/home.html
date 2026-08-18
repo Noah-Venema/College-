@@ -9,6 +9,86 @@
 </section>
 
 <section class="container my-5">
+  <h3 class="mb-3"><i class="bi bi-speedometer2 text-navy"></i> At a Glance</h3>
+  <div class="row g-3 mb-5">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 glance-card">
+        <div class="glance-label"><i class="bi bi-file-earmark-text"></i> Essays</div>
+        <div class="glance-value">{{ essay_counts.get('Submitted', 0) }}/{{ essay_counts.values() | sum }}</div>
+        <div class="glance-sub">submitted</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 glance-card">
+        <div class="glance-label"><i class="bi bi-award"></i> Scholarships</div>
+        <div class="glance-value">{{ total_won }}</div>
+        <div class="glance-sub">won of {{ total_applied }} applied for</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 glance-card">
+        <div class="glance-label"><i class="bi bi-cash-coin"></i> Financial Aid</div>
+        <div class="glance-value">{{ aid_counts.get('Received', 0) }}/{{ aid_counts.values() | sum }}</div>
+        <div class="glance-sub">received</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 shadow-sm h-100 glance-card">
+        <div class="glance-label"><i class="bi bi-journal-text"></i> Tasks</div>
+        <div class="glance-value">{{ task_counts.get('Done', 0) }}/{{ task_counts.values() | sum }}</div>
+        <div class="glance-sub">done</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm h-100">
+        <h5 class="mb-3"><i class="bi bi-calendar-event"></i> Upcoming Deadlines</h5>
+        {% if upcoming_deadlines %}
+          <ul class="list-unstyled mb-0">
+            {% for d in upcoming_deadlines %}
+            <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+              <span><i class="bi bi-dot"></i> {{ d.title }} <span class="badge category-badge category-{{ d.category|lower|replace(' ', '-') }}">{{ d.category }}</span></span>
+              <span class="text-muted small">{{ d.date.strftime('%b %-d') }} &middot; {{ (d.date - today).days }}d</span>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted mb-0">No upcoming deadlines — add some in the Calendar tab.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm h-100">
+        <h5 class="mb-3"><i class="bi bi-list-check"></i> Status Breakdown</h5>
+        <div class="mb-2">
+          <span class="fw-semibold">Essays:</span>
+          {% for status, count in essay_counts.items() %}
+            {% if count %}<span class="badge status-badge status-{{ status|lower|replace(' ', '-') }} me-1">{{ status }}: {{ count }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="mb-2">
+          <span class="fw-semibold">Scholarships:</span>
+          {% for status, count in scholarship_counts.items() %}
+            {% if count %}<span class="badge scholarship-status-badge status-{{ status|lower|replace(' ', '-') }} me-1">{{ status }}: {{ count }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="mb-2">
+          <span class="fw-semibold">Financial Aid:</span>
+          {% for status, count in aid_counts.items() %}
+            {% if count %}<span class="badge aid-status-badge status-{{ status|lower }} me-1">{{ status }}: {{ count }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="mb-0">
+          <span class="fw-semibold">Tests Logged:</span> {{ test_count }}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mb-5">
   <div class="row g-4">
     {% for section in sections %}
     <div class="col-md-6 col-lg-4">
