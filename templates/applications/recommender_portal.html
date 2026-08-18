@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Recommendation Letter Portal — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5" style="max-width: 560px;">
+  <div class="text-center mb-4">
+    <i class="bi bi-person-badge display-3 text-navy"></i>
+    <h1 class="mt-2 h3">Recommendation Letter Request</h1>
+  </div>
+
+  <div class="card p-4 shadow-sm">
+    <p>
+      Hi {{ recommender.name }},
+      {% if student %}<strong>{{ student.username }}</strong>{% else %}a student{% endif %}
+      has requested a recommendation letter from you{% if recommender.school_name %} for <strong>{{ recommender.school_name }}</strong>{% endif %}.
+      No account is needed — just upload your letter below.
+    </p>
+    {% if recommender.notes %}
+    <div class="alert alert-info"><i class="bi bi-info-circle"></i> {{ recommender.notes }}</div>
+    {% endif %}
+
+    {% if recommender.status == "Received" %}
+      <div class="alert alert-success mb-0">
+        <i class="bi bi-check-circle"></i> Thank you! Your letter ({{ recommender.letter_original_filename }}) was received
+        {% if recommender.received_at %}on {{ recommender.received_at.strftime('%b %-d, %Y') }}{% endif %}.
+        You can upload a replacement below if needed.
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('applications.recommender_portal', token=recommender.token) }}" enctype="multipart/form-data" class="mt-3">
+      <div class="mb-3">
+        <label class="form-label">Upload Letter (PDF, image)</label>
+        <input type="file" name="letter_file" class="form-control" accept=".png,.jpg,.jpeg,.gif,.pdf,.heic" required>
+      </div>
+      <button type="submit" class="btn btn-gold w-100">Submit Letter</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

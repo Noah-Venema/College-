@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Recommenders — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Add Recommender</h5>
+        <form method="POST" action="{{ url_for('applications.recommenders') }}">
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Ms. Rodriguez" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="teacher@school.edu">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+              {% for r in roles %}
+              <option value="{{ r }}">{{ r }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">For School (optional)</label>
+            <input type="text" name="school_name" class="form-control" placeholder="e.g. UMich, or leave blank for general">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="What to mention, deadline, etc."></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold w-100">Add Recommender</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      {% if recommenders %}
+        {% for rec in recommenders %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title mb-1">
+                {{ rec.name }}
+                <span class="badge role-badge role-{{ rec.role|lower }}">{{ rec.role }}</span>
+              </h5>
+              <span class="badge aid-status-badge status-{{ rec.status|lower }}">{{ rec.status }}</span>
+            </div>
+            {% if rec.school_name %}<p class="text-muted mb-1"><i class="bi bi-bank"></i> {{ rec.school_name }}</p>{% endif %}
+            {% if rec.email %}<p class="text-muted mb-1"><i class="bi bi-envelope"></i> {{ rec.email }}</p>{% endif %}
+            {% if rec.notes %}<p class="mb-2">{{ rec.notes }}</p>{% endif %}
+
+            {% if rec.status == "Received" and rec.letter_path %}
+              <a href="{{ url_for('applications.recommender_letter', filename=rec.letter_path) }}" target="_blank" class="btn btn-sm btn-outline-gold mb-2">
+                <i class="bi bi-paperclip"></i> {{ rec.letter_original_filename }}
+              </a>
+              <br>
+            {% endif %}
+
+            <div class="input-group input-group-sm mb-2" style="max-width: 420px;">
+              <input type="text" class="form-control" value="{{ portal_links[rec.id] }}" readonly onclick="this.select();">
+              <button class="btn btn-outline-gold" type="button" onclick="navigator.clipboard.writeText('{{ portal_links[rec.id] }}'); this.textContent='Copied!';">Copy Link</button>
+            </div>
+            {% if rec.email %}
+            <a class="btn btn-sm btn-outline-gold mb-2"
+               href="mailto:{{ rec.email }}?subject=Recommendation%20Letter%20Request&body=Hi%20{{ rec.name|urlencode }}%2C%0A%0AWould%20you%20be%20able%20to%20write%20a%20recommendation%20letter%20for%20me%3F%20You%20can%20upload%20it%20directly%20here%2C%20no%20account%20needed%3A%0A{{ portal_links[rec.id]|urlencode }}%0A%0AThank%20you%21">
+              <i class="bi bi-envelope-paper"></i> Email Request
+            </a>
+            {% endif %}
+
+            <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#edit-rec-{{ rec.id }}">
+              Edit
+            </button>
+            {% if rec.status != "Received" %}
+            <form method="POST" action="{{ url_for('applications.remind_recommender', recommender_id=rec.id) }}" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-bell"></i> Log Reminder</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('applications.delete_recommender', recommender_id=rec.id) }}" class="d-inline" onsubmit="return confirm('Remove this recommender?');">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+
+            <div class="collapse mt-3" id="edit-rec-{{ rec.id }}">
+              <form method="POST" action="{{ url_for('applications.edit_recommender', recommender_id=rec.id) }}">
+                <div class="mb-2">
+                  <label class="form-label">Name</label>
+                  <input type="text" name="name" class="form-control" value="{{ rec.name }}" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Email</label>
+                  <input type="email" name="email" class="form-control" value="{{ rec.email or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Role</label>
+                  <select name="role" class="form-select">
+                    {% for r in roles %}
+                    <option value="{{ r }}" {% if r == rec.role %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">For School</label>
+                  <input type="text" name="school_name" class="form-control" value="{{ rec.school_name or '' }}">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Notes</label>
+                  <textarea name="notes" class="form-control" rows="3">{{ rec.notes or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {{ empty_state("No recommenders yet — add a teacher or counselor to get started.", "bi-person-badge") }}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

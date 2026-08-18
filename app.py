@@ -17,11 +17,13 @@ def create_app():
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads", "test_proofs")
+    app.config["RECOMMENDER_UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads", "recommender_letters")
     app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB per upload
     app.config["ALLOWED_UPLOAD_EXTENSIONS"] = {"png", "jpg", "jpeg", "gif", "pdf", "heic"}
 
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    os.makedirs(app.config["RECOMMENDER_UPLOAD_FOLDER"], exist_ok=True)
 
     db.init_app(app)
     login_manager.init_app(app)

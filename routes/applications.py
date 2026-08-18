@@ -1,12 +1,13 @@
 import os
 import uuid
+from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_from_directory
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_from_directory, abort
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app import db
-from models import Essay, Honor, Activity, SchoolProfile, Course, TestEntry
+from models import Essay, Honor, Activity, SchoolProfile, Course, TestEntry, Recommender, User
 
 applications_bp = Blueprint("applications", __name__, url_prefix="/applications")
 
@@ -17,6 +18,7 @@ APP_TABS = [
     {"name": "Activities", "endpoint": "applications.activities"},
     {"name": "School Information", "endpoint": "applications.school_info"},
     {"name": "Testing", "endpoint": "applications.testing"},
+    {"name": "Recommenders", "endpoint": "applications.recommenders"},
 ]
 
 
@@ -353,3 +355,137 @@ def delete_test(test_id):
 @login_required
 def test_proof(filename):
     return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
+
+
+@applications_bp.route("/recommenders", methods=["GET", "POST"])
+@login_required
+def recommenders():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Recommender name is required.", "danger")
+        else:
+            recommender = Recommender(
+                user_id=current_user.id,
+                name=name,
+                email=request.form.get("email", "").strip(),
+                role=request.form.get("role", "Teacher"),
+                school_name=request.form.get("school_name", "").strip(),
+                notes=request.form.get("notes", "").strip(),
+            )
+            db.session.add(recommender)
+            db.session.commit()
+            flash("Recommender added. Share their portal link to collect the letter.", "success")
+        return redirect(url_for("applications.recommenders"))
+
+    all_recommenders = Recommender.query.filter_by(user_id=current_user.id).order_by(
+        Recommender.updated_at.desc()
+    ).all()
+    portal_links = {
+        r.id: url_for("applications.recommender_portal", token=r.token, _external=True)
+        for r in all_recommenders
+    }
+    return render_template(
+        "applications/recommenders.html",
+        tabs=APP_TABS,
+        active_tab="Recommenders",
+        recommenders=all_recommenders,
+        roles=Recommender.ROLES,
+        portal_links=portal_links,
+    )
+
+
+@applications_bp.route("/recommenders/<int:recommender_id>/edit", methods=["POST"])
+@login_required
+def edit_recommender(recommender_id):
+    recommender = Recommender.query.filter_by(id=recommender_id, user_id=current_user.id).first_or_404()
+    recommender.name = request.form.get("name", "").strip() or recommender.name
+    recommender.email = request.form.get("email", "").strip()
+    recommender.role = request.form.get("role", recommender.role)
+    recommender.school_name = request.form.get("school_name", "").strip()
+    recommender.notes = request.form.get("notes", "").strip()
+    db.session.commit()
+    flash("Recommender updated.", "success")
+    return redirect(url_for("applications.recommenders"))
+
+
+@applications_bp.route("/recommenders/<int:recommender_id>/remind", methods=["POST"])
+@login_required
+def remind_recommender(recommender_id):
+    """Resets the requested_at timestamp to log that a fresh reminder was sent."""
+    recommender = Recommender.query.filter_by(id=recommender_id, user_id=current_user.id).first_or_404()
+    recommender.requested_at = datetime.utcnow()
+    db.session.commit()
+    flash(f"Reminder logged for {recommender.name}.", "success")
+    return redirect(url_for("applications.recommenders"))
+
+
+@applications_bp.route("/recommenders/<int:recommender_id>/delete", methods=["POST"])
+@login_required
+def delete_recommender(recommender_id):
+    recommender = Recommender.query.filter_by(id=recommender_id, user_id=current_user.id).first_or_404()
+    if recommender.letter_path:
+        old_path = os.path.join(current_app.config["RECOMMENDER_UPLOAD_FOLDER"], recommender.letter_path)
+        if os.path.exists(old_path):
+            os.remove(old_path)
+    db.session.delete(recommender)
+    db.session.commit()
+    flash("Recommender removed.", "info")
+    return redirect(url_for("applications.recommenders"))
+
+
+def _save_recommender_upload(file_storage):
+    """Saves an uploaded recommendation letter with a unique name; returns (stored_path, original_name)."""
+    if not file_storage or not file_storage.filename:
+        return None, None
+    if not _allowed_file(file_storage.filename):
+        flash("Unsupported file type. Allowed: png, jpg, jpeg, gif, pdf, heic.", "danger")
+        return None, None
+
+    original_name = secure_filename(file_storage.filename)
+    ext = original_name.rsplit(".", 1)[-1].lower()
+    stored_name = f"{uuid.uuid4().hex}.{ext}"
+    file_storage.save(os.path.join(current_app.config["RECOMMENDER_UPLOAD_FOLDER"], stored_name))
+    return stored_name, original_name
+
+
+@applications_bp.route("/recommenders/portal/<token>", methods=["GET", "POST"])
+def recommender_portal(token):
+    """Public, login-free page a recommender can use to upload their letter.
+
+    Authenticated by an unguessable per-recommender token instead of a session,
+    since the recommender doesn't (and shouldn't need to) have an account here.
+    """
+    recommender = Recommender.query.filter_by(token=token).first()
+    if recommender is None:
+        abort(404)
+
+    student = User.query.get(recommender.user_id)
+
+    if request.method == "POST":
+        stored_name, original_name = _save_recommender_upload(request.files.get("letter_file"))
+        if stored_name:
+            if recommender.letter_path:
+                old_path = os.path.join(current_app.config["RECOMMENDER_UPLOAD_FOLDER"], recommender.letter_path)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            recommender.letter_path = stored_name
+            recommender.letter_original_filename = original_name
+            recommender.status = "Received"
+            recommender.received_at = datetime.utcnow()
+            db.session.commit()
+            flash("Thank you! Your letter has been submitted.", "success")
+        return redirect(url_for("applications.recommender_portal", token=token))
+
+    return render_template(
+        "applications/recommender_portal.html",
+        recommender=recommender,
+        student=student,
+    )
+
+
+@applications_bp.route("/recommenders/letter/<path:filename>")
+@login_required
+def recommender_letter(filename):
+    recommender = Recommender.query.filter_by(letter_path=filename, user_id=current_user.id).first_or_404()
+    return send_from_directory(current_app.config["RECOMMENDER_UPLOAD_FOLDER"], filename)
