@@ -8,3 +8,5 @@ instance/
 .env
 static/uploads/test_proofs/*
 !static/uploads/test_proofs/.gitkeep
+static/uploads/recommender_letters/*
+!static/uploads/recommender_letters/.gitkeep
