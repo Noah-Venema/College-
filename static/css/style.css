@@ -136,6 +136,31 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
   color: var(--gold);
 }
 
+/* Home "At a Glance" status cards */
+.glance-card {
+  border-left: 4px solid var(--gold);
+}
+
+.glance-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #8a8578;
+  font-weight: 600;
+}
+
+.glance-value {
+  font-family: 'Merriweather', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.glance-sub {
+  font-size: 0.8rem;
+  color: #8a8578;
+}
+
 /* Gold buttons */
 .btn-gold {
   background-color: var(--gold);
