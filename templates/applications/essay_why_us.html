@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Why Us Generator — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <p class="text-muted small">
+    Fill in the blanks below with real, specific details about the school (professors, programs,
+    clubs, traditions — the more specific, the better). This builds a starting draft that highlights
+    exactly where to plug in that research; it's a scaffold to rewrite in your own voice, not a
+    finished essay.
+  </p>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Fill In The Blanks</h5>
+        <div class="mb-2">
+          <label class="form-label">School Name</label>
+          <input type="text" id="wu-school" class="form-control wu-input" placeholder="Example University">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Intended Major / Program</label>
+          <input type="text" id="wu-major" class="form-control wu-input" placeholder="Mechanical Engineering">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Specific Course, Professor, or Research Lab</label>
+          <input type="text" id="wu-academic" class="form-control wu-input" placeholder="Prof. Smith's robotics lab">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Club, Organization, or Tradition</label>
+          <input type="text" id="wu-club" class="form-control wu-input" placeholder="the Solar Car Club">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Personal Connection (why it matters to you)</label>
+          <textarea id="wu-connection" class="form-control wu-input" rows="2" placeholder="I've built go-karts with my dad since I was 12, and..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm h-100">
+        <h5 class="mb-3">Draft Scaffold</h5>
+        <textarea id="wu-output" class="form-control" rows="14" readonly></textarea>
+        <button type="button" id="wu-copy" class="btn btn-sm btn-outline-navy mt-2">
+          <i class="bi bi-clipboard"></i> Copy to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function generateWhyUs() {
+    const school = document.getElementById('wu-school').value || '[School Name]';
+    const major = document.getElementById('wu-major').value || '[your intended major/program]';
+    const academic = document.getElementById('wu-academic').value || '[a specific course, professor, or lab]';
+    const club = document.getElementById('wu-club').value || '[a specific club or tradition]';
+    const connection = document.getElementById('wu-connection').value || '[why this matters to you personally]';
+
+    const text = `When I picture myself at ${school}, I see myself diving into ${major} — specifically through ${academic}, which stood out to me because [explain what specifically caught your attention and why it fits your goals].
+
+Outside the classroom, I'm drawn to ${club}, because [explain the specific activity/impact you'd want to have there, not just that it exists].
+
+${connection}
+
+That's why ${school} isn't just a good fit on paper for me — it's where I can actually [describe the specific outcome/goal you're working toward].`;
+
+    document.getElementById('wu-output').value = text;
+  }
+
+  document.querySelectorAll('.wu-input').forEach((input) => {
+    input.addEventListener('input', generateWhyUs);
+  });
+  generateWhyUs();
+
+  document.getElementById('wu-copy').addEventListener('click', () => {
+    const output = document.getElementById('wu-output');
+    output.select();
+    navigator.clipboard.writeText(output.value).then(() => {
+      const btn = document.getElementById('wu-copy');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+      setTimeout(() => { btn.innerHTML = original; }, 1500);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Peer Review — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <p class="text-muted small">
+    Fully anonymous both ways — reviewers never see whose essay it is, and you never see who
+    reviewed yours. Opt an essay in from its Workspace page. Reviewing others is optional but
+    the more people who review, the more feedback everyone gets back.
+  </p>
+
+  <h5 class="mb-3"><i class="bi bi-inbox"></i> Essays Waiting for Review</h5>
+  {% if queue %}
+  {% for essay in queue %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <p class="text-muted mb-1"><i class="bi bi-tag"></i> {{ essay.essay_type }}{% if essay.word_limit %} · {{ essay.word_limit }} word limit{% endif %}</p>
+      {% if essay.prompt %}<p class="mb-2"><strong>Prompt:</strong> {{ essay.prompt }}</p>{% endif %}
+      {% if essay.content %}
+      <div class="border rounded p-2 mb-2 essay-notes" style="max-height: 200px; overflow-y: auto; white-space: pre-wrap;">{{ essay.content }}</div>
+      {% else %}
+      <p class="text-muted small">No draft content yet.</p>
+      {% endif %}
+
+      <button class="btn btn-sm btn-navy" type="button" data-bs-toggle="collapse" data-bs-target="#review-{{ essay.id }}">
+        <i class="bi bi-chat-square-text"></i> Leave Feedback
+      </button>
+
+      <div class="collapse mt-3" id="review-{{ essay.id }}">
+        <form method="POST" action="{{ url_for('applications.submit_essay_review', essay_id=essay.id) }}">
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label class="form-label small">Clarity (1-5)</label>
+              <input type="number" name="clarity_rating" class="form-control form-control-sm" min="1" max="5" value="3" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Voice / Authenticity (1-5)</label>
+              <input type="number" name="voice_rating" class="form-control form-control-sm" min="1" max="5" value="3" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Structure (1-5)</label>
+              <input type="number" name="structure_rating" class="form-control form-control-sm" min="1" max="5" value="3" required>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small">Comments</label>
+            <textarea name="comments" class="form-control form-control-sm" rows="3" placeholder="What worked? What's confusing? What would you want to know more about?"></textarea>
+          </div>
+          <button type="submit" class="btn btn-sm btn-gold">Submit Feedback</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+    {{ empty_state("No essays waiting for review right now — check back later.", "bi-inbox") }}
+  {% endif %}
+
+  <h5 class="mb-3 mt-5"><i class="bi bi-person-check"></i> Your Essays Open for Review</h5>
+  {% if my_open_essays %}
+  {% for essay in my_open_essays %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <h6 class="mb-1">{{ essay.title }}</h6>
+        <a href="{{ url_for('applications.essay_workspace', essay_id=essay.id) }}" class="btn btn-sm btn-outline-navy">View Feedback</a>
+      </div>
+      <p class="text-muted small mb-0">
+        {{ feedback_received.get(essay.id, []) | length }} review(s) received
+      </p>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+    <p class="text-muted small">
+      No essays opted in yet — open one to review from its Workspace page (toggle "Open this essay
+      to the anonymous Peer Review pool").
+    </p>
+  {% endif %}
+</section>
+{% endblock %}

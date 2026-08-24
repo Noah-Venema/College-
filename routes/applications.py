@@ -7,9 +7,31 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app import db
-from models import Essay, Honor, Activity, SchoolProfile, Course, TestEntry, Recommender, User
+from models import (
+    Essay,
+    EssayPrompt,
+    BrainstormEntry,
+    EssayReview,
+    Honor,
+    Activity,
+    SchoolProfile,
+    Course,
+    TestEntry,
+    Recommender,
+    User,
+)
 
 applications_bp = Blueprint("applications", __name__, url_prefix="/applications")
+
+# Sub-navigation shown across the Essays workspace pages.
+ESSAY_TOOL_TABS = [
+    {"name": "My Essays", "endpoint": "applications.essays"},
+    {"name": "Prompt Bank", "endpoint": "applications.essay_prompts"},
+    {"name": "Brainstorming", "endpoint": "applications.essay_brainstorm"},
+    {"name": "Why Us Generator", "endpoint": "applications.essay_why_us"},
+    {"name": "Peer Review", "endpoint": "applications.essay_peer_review"},
+    {"name": "Common Mistakes", "endpoint": "applications.essay_mistakes"},
+]
 
 # Sub-tabs shown across every page in the Applications section.
 APP_TABS = [
@@ -36,12 +58,15 @@ def essays():
         if not title:
             flash("Title is required.", "danger")
         else:
+            word_limit = request.form.get("word_limit", "").strip()
             essay = Essay(
                 user_id=current_user.id,
                 title=title,
                 prompt=request.form.get("prompt", "").strip(),
                 school_name=request.form.get("school_name", "").strip(),
                 status=request.form.get("status", "Not Started"),
+                essay_type=request.form.get("essay_type", "Personal Statement"),
+                word_limit=int(word_limit) if word_limit.isdigit() else None,
                 notes=request.form.get("notes", "").strip(),
             )
             db.session.add(essay)
@@ -54,8 +79,11 @@ def essays():
         "applications/essays.html",
         tabs=APP_TABS,
         active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="My Essays",
         essays=all_essays,
         statuses=Essay.STATUSES,
+        essay_types=Essay.TYPES,
     )
 
 
@@ -67,6 +95,9 @@ def edit_essay(essay_id):
     essay.prompt = request.form.get("prompt", "").strip()
     essay.school_name = request.form.get("school_name", "").strip()
     essay.status = request.form.get("status", essay.status)
+    essay.essay_type = request.form.get("essay_type", essay.essay_type)
+    word_limit = request.form.get("word_limit", "").strip()
+    essay.word_limit = int(word_limit) if word_limit.isdigit() else None
     essay.notes = request.form.get("notes", "").strip()
     db.session.commit()
     flash("Essay updated.", "success")
@@ -81,6 +112,261 @@ def delete_essay(essay_id):
     db.session.commit()
     flash("Essay deleted.", "info")
     return redirect(url_for("applications.essays"))
+
+
+@applications_bp.route("/essays/<int:essay_id>/workspace", methods=["GET", "POST"])
+@login_required
+def essay_workspace(essay_id):
+    """The essay editor: draft content, live word/char counter, cliché/tone checker,
+    voice-to-text drafting, and the open-for-peer-review toggle all live here."""
+    essay = Essay.query.filter_by(id=essay_id, user_id=current_user.id).first_or_404()
+
+    if request.method == "POST":
+        essay.content = request.form.get("content", "")
+        essay.is_open_for_review = request.form.get("is_open_for_review") == "on"
+        db.session.commit()
+        flash("Draft saved.", "success")
+        return redirect(url_for("applications.essay_workspace", essay_id=essay.id))
+
+    reviews = EssayReview.query.filter_by(essay_id=essay.id).order_by(EssayReview.created_at.desc()).all()
+
+    return render_template(
+        "applications/essay_workspace.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="My Essays",
+        essay=essay,
+        reviews=reviews,
+    )
+
+
+@applications_bp.route("/essays/prompts", methods=["GET", "POST"])
+@login_required
+def essay_prompts():
+    """Prompt Repository: built-in Common App/Coalition App prompts (visible to everyone)
+    plus each student's own school-specific supplemental prompts."""
+    if request.method == "POST":
+        prompt_text = request.form.get("prompt_text", "").strip()
+        if not prompt_text:
+            flash("Prompt text is required.", "danger")
+        else:
+            word_limit = request.form.get("word_limit", "").strip()
+            prompt = EssayPrompt(
+                user_id=current_user.id,
+                category=request.form.get("category", "Custom"),
+                school_name=request.form.get("school_name", "").strip(),
+                prompt_text=prompt_text,
+                word_limit=int(word_limit) if word_limit.isdigit() else None,
+            )
+            db.session.add(prompt)
+            db.session.commit()
+            flash("Prompt added.", "success")
+        return redirect(url_for("applications.essay_prompts"))
+
+    search = request.args.get("q", "").strip()
+    query = EssayPrompt.query.filter(
+        (EssayPrompt.user_id == current_user.id) | (EssayPrompt.user_id.is_(None))
+    )
+    if search:
+        like = f"%{search}%"
+        query = query.filter(
+            (EssayPrompt.prompt_text.ilike(like)) | (EssayPrompt.school_name.ilike(like))
+        )
+    all_prompts = query.order_by(EssayPrompt.category.asc(), EssayPrompt.created_at.asc()).all()
+
+    return render_template(
+        "applications/essay_prompts.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="Prompt Bank",
+        prompts=all_prompts,
+        categories=EssayPrompt.CATEGORIES,
+        search=search,
+    )
+
+
+@applications_bp.route("/essays/prompts/<int:prompt_id>/use", methods=["POST"])
+@login_required
+def use_prompt(prompt_id):
+    """Creates a new Essay pre-filled from a prompt bank entry."""
+    prompt = EssayPrompt.query.filter(
+        EssayPrompt.id == prompt_id,
+        (EssayPrompt.user_id == current_user.id) | (EssayPrompt.user_id.is_(None)),
+    ).first_or_404()
+
+    essay = Essay(
+        user_id=current_user.id,
+        title=f"{prompt.category} Essay" + (f" — {prompt.school_name}" if prompt.school_name else ""),
+        prompt=prompt.prompt_text,
+        school_name=prompt.school_name or "",
+        status="Not Started",
+        essay_type="Supplemental / Why Us" if prompt.category == "School Supplemental" else "Personal Statement",
+        word_limit=prompt.word_limit,
+    )
+    db.session.add(essay)
+    db.session.commit()
+    flash("Essay created from prompt — start drafting in My Essays.", "success")
+    return redirect(url_for("applications.essay_workspace", essay_id=essay.id))
+
+
+@applications_bp.route("/essays/prompts/<int:prompt_id>/delete", methods=["POST"])
+@login_required
+def delete_prompt(prompt_id):
+    # Only custom prompts a user added themselves can be deleted — built-ins (user_id=None)
+    # are shared reference data.
+    prompt = EssayPrompt.query.filter_by(id=prompt_id, user_id=current_user.id).first_or_404()
+    db.session.delete(prompt)
+    db.session.commit()
+    flash("Prompt removed.", "info")
+    return redirect(url_for("applications.essay_prompts"))
+
+
+@applications_bp.route("/essays/brainstorm", methods=["GET", "POST"])
+@login_required
+def essay_brainstorm():
+    """Brainstorming Bootcamp: 5 guided reflective questions to surface topic ideas."""
+    if request.method == "POST":
+        entry = BrainstormEntry(
+            user_id=current_user.id,
+            essay_id=request.form.get("essay_id") or None,
+            answer_1=request.form.get("answer_1", "").strip(),
+            answer_2=request.form.get("answer_2", "").strip(),
+            answer_3=request.form.get("answer_3", "").strip(),
+            answer_4=request.form.get("answer_4", "").strip(),
+            answer_5=request.form.get("answer_5", "").strip(),
+        )
+        db.session.add(entry)
+        db.session.commit()
+        flash("Brainstorm saved — look for themes across your answers.", "success")
+        return redirect(url_for("applications.essay_brainstorm"))
+
+    past_entries = BrainstormEntry.query.filter_by(user_id=current_user.id).order_by(
+        BrainstormEntry.created_at.desc()
+    ).all()
+    my_essays = Essay.query.filter_by(user_id=current_user.id).order_by(Essay.title.asc()).all()
+
+    return render_template(
+        "applications/essay_brainstorm.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="Brainstorming",
+        questions=BrainstormEntry.QUESTIONS,
+        past_entries=past_entries,
+        my_essays=my_essays,
+    )
+
+
+@applications_bp.route("/essays/brainstorm/<int:entry_id>/delete", methods=["POST"])
+@login_required
+def delete_brainstorm(entry_id):
+    entry = BrainstormEntry.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    db.session.delete(entry)
+    db.session.commit()
+    flash("Brainstorm entry deleted.", "info")
+    return redirect(url_for("applications.essay_brainstorm"))
+
+
+@applications_bp.route("/essays/why-us")
+@login_required
+def essay_why_us():
+    """Why-Us Mad Libs: a fill-in-the-blank template highlighting exactly where to
+    insert school-specific facts (professors, programs, clubs) — pure client-side tool."""
+    return render_template(
+        "applications/essay_why_us.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="Why Us Generator",
+    )
+
+
+@applications_bp.route("/essays/mistakes")
+@login_required
+def essay_mistakes():
+    """Common Mistakes Library: static curated reference content."""
+    return render_template(
+        "applications/essay_mistakes.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="Common Mistakes",
+    )
+
+
+@applications_bp.route("/essays/peer-review")
+@login_required
+def essay_peer_review():
+    """Anonymous Peer Review Exchange: browse other students' essays opted into the
+    review pool (never your own), leave rubric feedback, and see feedback you've
+    received on your own opted-in essays."""
+    already_reviewed_ids = {
+        r.essay_id
+        for r in EssayReview.query.filter_by(reviewer_user_id=current_user.id).all()
+    }
+    queue = (
+        Essay.query.filter(
+            Essay.is_open_for_review.is_(True),
+            Essay.user_id != current_user.id,
+        )
+        .order_by(Essay.updated_at.desc())
+        .all()
+    )
+    queue = [e for e in queue if e.id not in already_reviewed_ids]
+
+    my_open_essays = Essay.query.filter_by(user_id=current_user.id, is_open_for_review=True).all()
+    feedback_received = {
+        essay.id: EssayReview.query.filter_by(essay_id=essay.id).order_by(EssayReview.created_at.desc()).all()
+        for essay in my_open_essays
+    }
+
+    return render_template(
+        "applications/essay_peer_review.html",
+        tabs=APP_TABS,
+        active_tab="Essays",
+        essay_tabs=ESSAY_TOOL_TABS,
+        active_essay_tab="Peer Review",
+        queue=queue,
+        my_open_essays=my_open_essays,
+        feedback_received=feedback_received,
+    )
+
+
+@applications_bp.route("/essays/peer-review/<int:essay_id>/submit", methods=["POST"])
+@login_required
+def submit_essay_review(essay_id):
+    essay = Essay.query.filter(
+        Essay.id == essay_id,
+        Essay.is_open_for_review.is_(True),
+        Essay.user_id != current_user.id,
+    ).first_or_404()
+
+    existing = EssayReview.query.filter_by(essay_id=essay.id, reviewer_user_id=current_user.id).first()
+    if existing:
+        flash("You've already reviewed this essay.", "info")
+        return redirect(url_for("applications.essay_peer_review"))
+
+    def _rating(field):
+        try:
+            value = int(request.form.get(field, 0))
+        except (TypeError, ValueError):
+            value = 0
+        return max(1, min(5, value)) if value else 3
+
+    review = EssayReview(
+        essay_id=essay.id,
+        reviewer_user_id=current_user.id,
+        clarity_rating=_rating("clarity_rating"),
+        voice_rating=_rating("voice_rating"),
+        structure_rating=_rating("structure_rating"),
+        comments=request.form.get("comments", "").strip(),
+    )
+    db.session.add(review)
+    db.session.commit()
+    flash("Feedback submitted — thanks for helping a fellow applicant!", "success")
+    return redirect(url_for("applications.essay_peer_review"))
 
 
 # Placeholders for the remaining sub-tabs — built out on their own branches next.

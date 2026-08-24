@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Common Mistakes — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <p class="text-muted small">
+    Admissions readers see thousands of essays a year — these are the topics/openings that show up
+    constantly. That doesn't mean you can't write about them, just that you need a genuinely
+    specific, personal angle to stand out.
+  </p>
+
+  <div class="accordion" id="mistakesAccordion">
+    {% set mistakes = [
+      ("The Sports Injury Essay", "Describing an injury/comeback in vivid detail, but the essay is really about the injury, not about who you are because of it. Fix: spend 80% of the essay on what changed in how you think or act, not on play-by-play recovery details."),
+      ("The Mission Trip / Volunteering Epiphany", "\"I realized how privileged I was\" after a short volunteer trip abroad, without depth or ongoing follow-through. Fix: show sustained commitment and specific relationships/lessons, not a one-week epiphany."),
+      ("The Thesaurus Essay", "Swapping in fancy vocabulary that doesn't sound like a real teenager wrote it. Fix: read it out loud — if you wouldn't say it to a friend, rewrite it."),
+      ("Starting With a Dictionary Definition", "\"Webster's Dictionary defines success as...\" is one of the most common openers reviewers see. Fix: open with a scene, a specific moment, or a striking detail instead."),
+      ("The Resume in Paragraph Form", "Restating your activities list/awards instead of reflecting on them. Fix: the essay should reveal something the rest of the application can't — not repeat it."),
+      ("The Grand Statement Opener", "\"Ever since I was young, I've always been passionate about helping others.\" Vague, generic, could be written by anyone. Fix: get specific and concrete immediately."),
+      ("The Humble-Brag", "Framing an accomplishment as a struggle just to list the accomplishment. Fix: be honest about real struggles, not manufactured ones."),
+      ("The Tragedy Tourism Essay", "Writing about someone else's hardship (a family member's illness, a friend's struggle) as if it's your own story. Fix: it's fine to reference, but keep the focus on your own growth/actions."),
+      ("The Laundry List Essay", "Trying to cram in every achievement/interest instead of going deep on one thing. Fix: pick ONE moment or theme and go deep, not wide."),
+      ("The Overly Formal Essay", "Writing like a legal document or academic paper instead of a personal narrative. Fix: essays are meant to sound like you, conversational but polished."),
+      ("The Non-Answer to a Prompt", "Writing a generic essay and forcing it to fit a prompt it doesn't actually answer. Fix: make sure your essay's core point directly addresses what's being asked."),
+      ("Explaining Instead of Showing", "Telling the reader \"I am resilient\" instead of showing a scene that demonstrates it. Fix: show, then briefly reflect — don't just state the trait."),
+      ("The Passive, Detached Voice", "Overusing \"it was decided that...\"/\"mistakes were made\" style writing that removes you from the action. Fix: use active voice — \"I decided,\" \"I made a mistake and learned...\"."),
+      ("Ending With a Cliché Life Lesson", "\"And that's when I learned that hard work pays off\" as a closer. Fix: end with something more specific and forward-looking — what will you actually do with what you learned?"),
+      ("Ignoring the Word Limit Entirely", "Submitting an essay wildly over or under the stated limit, or reusing one essay unedited across every school's supplement. Fix: always tailor length and content to the specific prompt and school."),
+    ] %}
+    {% for title, advice in mistakes %}
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#mistake-{{ loop.index }}">
+          {{ loop.index }}. {{ title }}
+        </button>
+      </h2>
+      <div id="mistake-{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#mistakesAccordion">
+        <div class="accordion-body">{{ advice }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}{{ essay.title }} — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h3 class="mb-1">{{ essay.title }}</h3>
+      <p class="text-muted mb-0">
+        {{ essay.essay_type }}{% if essay.school_name %} · {{ essay.school_name }}{% endif %}
+        {% if essay.word_limit %} · {{ essay.word_limit }} word limit{% endif %}
+      </p>
+    </div>
+    <a href="{{ url_for('applications.essays') }}" class="btn btn-outline-secondary btn-sm">Back to My Essays</a>
+  </div>
+
+  {% if essay.prompt %}
+  <div class="alert alert-light border mb-3"><strong>Prompt:</strong> {{ essay.prompt }}</div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <form method="POST" action="{{ url_for('applications.essay_workspace', essay_id=essay.id) }}">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label mb-0">Draft</label>
+          <button type="button" id="voice-draft-btn" class="btn btn-sm btn-outline-navy">
+            <i class="bi bi-mic"></i> Dictate
+          </button>
+        </div>
+        <textarea name="content" id="essay-content" class="form-control" rows="18">{{ essay.content or '' }}</textarea>
+
+        <div class="d-flex justify-content-between mt-2 mb-3">
+          <div id="word-count-display" class="small text-muted"></div>
+          <div id="char-count-display" class="small text-muted"></div>
+        </div>
+
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" role="switch" id="is_open_for_review" name="is_open_for_review"
+                 {% if essay.is_open_for_review %}checked{% endif %}>
+          <label class="form-check-label" for="is_open_for_review">
+            Open this essay to the anonymous Peer Review pool
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-gold">Save Draft</button>
+      </form>
+
+      <div class="card p-3 shadow-sm mt-4">
+        <h6 class="mb-2"><i class="bi bi-magic"></i> Tone &amp; Cliché Checker</h6>
+        <p class="text-muted small mb-2">
+          Heuristic-only — flags common essay clichés, overused words, and passive voice so you can
+          take a second look. It won't catch everything and isn't a substitute for a human reader.
+        </p>
+        <div id="tone-checker-results" class="small"></div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      {% if reviews %}
+      <div class="card p-3 shadow-sm">
+        <h6 class="mb-3"><i class="bi bi-chat-square-text"></i> Peer Feedback Received</h6>
+        {% for review in reviews %}
+        <div class="border rounded p-2 mb-2">
+          <div class="small text-muted mb-1">Anonymous reviewer</div>
+          <div class="small mb-1">
+            Clarity: {{ review.clarity_rating }}/5 · Voice: {{ review.voice_rating }}/5 · Structure: {{ review.structure_rating }}/5
+          </div>
+          {% if review.comments %}<div class="small">{{ review.comments }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% elif essay.is_open_for_review %}
+      <div class="card p-3 shadow-sm text-muted small">
+        Open for review — no feedback yet. Check back soon!
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  const CLICHE_PATTERNS = [
+    "ever since i was young", "little did i know", "since the beginning of time",
+    "the sports injury", "mission trip", "the big game", "as the saying goes",
+    "webster's dictionary defines", "i've always been passionate about", "in today's society",
+    "little do people know", "life lesson", "changed my life forever", "life-changing experience",
+  ];
+  const OVERUSED_WORDS = ["very", "really", "actually", "basically", "literally", "amazing", "passionate", "unique"];
+  const PASSIVE_HINTS = [" was ", " were ", " been ", " being ", " is being ", " are being "];
+
+  function formatCounts() {
+    const text = document.getElementById('essay-content').value;
+    const words = text.trim().length ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const limit = {{ essay.word_limit | tojson }};
+
+    const wordEl = document.getElementById('word-count-display');
+    let wordLabel = words + ' word' + (words === 1 ? '' : 's');
+    if (limit) {
+      wordLabel += ' / ' + limit;
+      wordEl.classList.toggle('text-danger', words > limit);
+      wordEl.classList.toggle('fw-semibold', words > limit);
+    }
+    wordEl.textContent = wordLabel;
+    document.getElementById('char-count-display').textContent = chars + ' characters';
+  }
+
+  function runToneChecker() {
+    const text = document.getElementById('essay-content').value;
+    const lowerText = text.toLowerCase();
+    const resultsEl = document.getElementById('tone-checker-results');
+    const issues = [];
+
+    CLICHE_PATTERNS.forEach((phrase) => {
+      if (lowerText.includes(phrase)) {
+        issues.push('Possible cliché: "' + phrase + '" — see the Common Mistakes library for alternatives.');
+      }
+    });
+
+    const wordCounts = {};
+    OVERUSED_WORDS.forEach((word) => {
+      const re = new RegExp('\\b' + word + '\\b', 'gi');
+      const matches = lowerText.match(re);
+      if (matches && matches.length >= 2) {
+        wordCounts[word] = matches.length;
+      }
+    });
+    Object.keys(wordCounts).forEach((word) => {
+      issues.push('"' + word + '" appears ' + wordCounts[word] + ' times — consider more specific language.');
+    });
+
+    let passiveCount = 0;
+    PASSIVE_HINTS.forEach((hint) => {
+      const re = new RegExp(hint.trim(), 'gi');
+      const matches = lowerText.match(re);
+      if (matches) passiveCount += matches.length;
+    });
+    if (passiveCount >= 3) {
+      issues.push('Found ' + passiveCount + ' possible passive-voice constructions ("was", "were", "been") — active voice usually feels more personal.');
+    }
+
+    if (issues.length === 0) {
+      resultsEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> No obvious issues found.</span>';
+    } else {
+      resultsEl.innerHTML = '<ul class="mb-0">' + issues.map((i) => '<li>' + i + '</li>').join('') + '</ul>';
+    }
+  }
+
+  const contentEl = document.getElementById('essay-content');
+  contentEl.addEventListener('input', () => {
+    formatCounts();
+    runToneChecker();
+  });
+  formatCounts();
+  runToneChecker();
+
+  // Voice-to-text drafting via the browser's built-in Web Speech API (Chrome/Edge).
+  // No server/API key needed; falls back to a disabled button if unsupported.
+  const voiceBtn = document.getElementById('voice-draft-btn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    voiceBtn.disabled = true;
+    voiceBtn.title = 'Voice dictation is not supported in this browser';
+  } else {
+    let recognizing = false;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      const sep = contentEl.value && !contentEl.value.endsWith(' ') ? ' ' : '';
+      contentEl.value += sep + transcript;
+      formatCounts();
+      runToneChecker();
+    };
+    recognition.onend = () => {
+      recognizing = false;
+      voiceBtn.classList.remove('btn-navy');
+      voiceBtn.classList.add('btn-outline-navy');
+      voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Dictate';
+    };
+
+    voiceBtn.addEventListener('click', () => {
+      if (recognizing) {
+        recognition.stop();
+        return;
+      }
+      recognizing = true;
+      voiceBtn.classList.remove('btn-outline-navy');
+      voiceBtn.classList.add('btn-navy');
+      voiceBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Listening… (click to stop)';
+      recognition.start();
+    });
+  }
+</script>
+{% endblock %}

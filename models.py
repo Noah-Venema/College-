@@ -33,10 +33,72 @@ class Essay(db.Model):
     school_name = db.Column(db.String(200))
     status = db.Column(db.String(30), nullable=False, default="Not Started")
     notes = db.Column(db.Text)
+    # The actual essay draft text, edited in the Essay Workspace (word counter, tone
+    # checker, voice drafting all operate on this field).
+    content = db.Column(db.Text)
+    essay_type = db.Column(db.String(30), nullable=False, default="Personal Statement")
+    word_limit = db.Column(db.Integer)
+    # Opt-in flag: only essays explicitly marked open appear in the anonymous peer
+    # review queue for other users to review.
+    is_open_for_review = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     STATUSES = ["Not Started", "Draft", "Final", "Submitted"]
+    TYPES = ["Personal Statement", "Supplemental / Why Us", "Other"]
+
+
+class EssayPrompt(db.Model):
+    """Prompt Repository entry. Built-in prompts (Common App, etc.) have user_id=None and
+    are visible to everyone; user_id is set for a student's own school-specific supplemental
+    prompts they've added."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    category = db.Column(db.String(40), nullable=False, default="Custom")
+    school_name = db.Column(db.String(200))
+    prompt_text = db.Column(db.Text, nullable=False)
+    word_limit = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    CATEGORIES = ["Common App", "Coalition App", "School Supplemental", "Custom"]
+
+
+class BrainstormEntry(db.Model):
+    """One completed run of the Brainstorming Bootcamp guided-prompt flow."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    essay_id = db.Column(db.Integer, db.ForeignKey("essay.id"), nullable=True)
+    answer_1 = db.Column(db.Text)
+    answer_2 = db.Column(db.Text)
+    answer_3 = db.Column(db.Text)
+    answer_4 = db.Column(db.Text)
+    answer_5 = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    QUESTIONS = [
+        "What's a time you failed, or something didn't go as planned? What happened?",
+        "What's something you could talk about for hours without getting bored?",
+        "Who has influenced you the most, and what did they teach you without meaning to?",
+        "What's a moment you felt most like yourself?",
+        "If a close friend described you in one story, what story would they tell?",
+    ]
+
+
+class EssayReview(db.Model):
+    """Anonymous peer feedback on an essay opted into the review pool. Neither the
+    reviewer's identity nor (on the review-queue side) the essay author's identity is
+    shown to the other party."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    essay_id = db.Column(db.Integer, db.ForeignKey("essay.id"), nullable=False)
+    reviewer_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    clarity_rating = db.Column(db.Integer, nullable=False)
+    voice_rating = db.Column(db.Integer, nullable=False)
+    structure_rating = db.Column(db.Integer, nullable=False)
+    comments = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Honor(db.Model):

@@ -1,0 +1,9 @@
+<ul class="nav nav-pills essay-subtabs mb-4">
+  {% for tab in essay_tabs %}
+  <li class="nav-item">
+    <a class="nav-link {% if tab.name == active_essay_tab %}active{% endif %}" href="{{ url_for(tab.endpoint) }}">
+      {{ tab.name }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Brainstorming — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <p class="text-muted small">
+    Answer these 5 short prompts honestly — don't overthink it. Look for a theme across your
+    answers afterward; that's often the real essay topic hiding underneath.
+  </p>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <form method="POST" action="{{ url_for('applications.essay_brainstorm') }}">
+      {% if my_essays %}
+      <div class="mb-3">
+        <label class="form-label">Link to an essay (optional)</label>
+        <select name="essay_id" class="form-select">
+          <option value="">— Not linked —</option>
+          {% for essay in my_essays %}
+          <option value="{{ essay.id }}">{{ essay.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      {% for q in questions %}
+      <div class="mb-3">
+        <label class="form-label">{{ loop.index }}. {{ q }}</label>
+        <textarea name="answer_{{ loop.index }}" class="form-control" rows="2"></textarea>
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-gold">Save Brainstorm</button>
+    </form>
+  </div>
+
+  {% if past_entries %}
+  <h5 class="mb-3">Past Brainstorms</h5>
+  {% for entry in past_entries %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <p class="text-muted small mb-2">{{ entry.created_at.strftime('%b %d, %Y') }}</p>
+        <form method="POST" action="{{ url_for('applications.delete_brainstorm', entry_id=entry.id) }}" onsubmit="return confirm('Delete this brainstorm?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </div>
+      {% for q in questions %}
+        {% set answer = [entry.answer_1, entry.answer_2, entry.answer_3, entry.answer_4, entry.answer_5][loop.index0] %}
+        {% if answer %}
+        <p class="mb-1"><strong>{{ q }}</strong><br>{{ answer }}</p>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+    {{ empty_state("No brainstorms saved yet.", "bi-lightbulb") }}
+  {% endif %}
+</section>
+{% endblock %}

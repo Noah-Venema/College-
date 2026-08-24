@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state %}
+{% block title %}Prompt Bank — {{ site_name }}{% endblock %}
+{% block content %}
+<section class="container my-5">
+  <h1 class="mb-4"><i class="bi bi-file-earmark-text text-navy"></i> Applications</h1>
+
+  {% include "applications/_subtabs.html" %}
+  {% include "applications/_essay_subtabs.html" %}
+
+  <p class="text-muted small">
+    Common App prompts are pulled in for you. Coalition App and school-specific supplemental
+    prompts vary by year/school — add the ones you need below (check the school's own
+    application portal for the most current wording).
+  </p>
+
+  <form method="GET" action="{{ url_for('applications.essay_prompts') }}" class="mb-4">
+    <div class="input-group" style="max-width: 400px;">
+      <input type="text" name="q" class="form-control" placeholder="Search prompts or schools..." value="{{ search }}">
+      <button type="submit" class="btn btn-outline-navy">Search</button>
+    </div>
+  </form>
+
+  <div class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3">Add Your Own Prompt</h5>
+    <form method="POST" action="{{ url_for('applications.essay_prompts') }}" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Category</label>
+        <select name="category" class="form-select">
+          {% for c in categories %}
+          <option value="{{ c }}" {% if c == 'School Supplemental' %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">School (optional)</label>
+        <input type="text" name="school_name" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Word Limit</label>
+        <input type="number" name="word_limit" class="form-control" min="1">
+      </div>
+      <div class="col-md-4"></div>
+      <div class="col-12">
+        <label class="form-label">Prompt Text</label>
+        <textarea name="prompt_text" class="form-control" rows="2" required></textarea>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-gold">Add Prompt</button>
+      </div>
+    </form>
+  </div>
+
+  {% if prompts %}
+  {% set ns = namespace(current_category = '') %}
+  {% for prompt in prompts %}
+    {% if prompt.category != ns.current_category %}
+      {% set ns.current_category = prompt.category %}
+      <h5 class="mt-4 mb-3">{{ prompt.category }}</h5>
+    {% endif %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            {% if prompt.school_name %}<p class="text-muted mb-1"><i class="bi bi-bank"></i> {{ prompt.school_name }}</p>{% endif %}
+            <p class="mb-1">{{ prompt.prompt_text }}</p>
+            {% if prompt.word_limit %}<p class="text-muted small mb-0">{{ prompt.word_limit }} word limit</p>{% endif %}
+          </div>
+        </div>
+        <form method="POST" action="{{ url_for('applications.use_prompt', prompt_id=prompt.id) }}" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-navy mt-2"><i class="bi bi-plus-circle"></i> Use This Prompt</button>
+        </form>
+        {% if prompt.user_id %}
+        <form method="POST" action="{{ url_for('applications.delete_prompt', prompt_id=prompt.id) }}" class="d-inline" onsubmit="return confirm('Delete this prompt?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger mt-2">Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  {% else %}
+    {{ empty_state("No prompts match your search.", "bi-search") }}
+  {% endif %}
+</section>
+{% endblock %}
