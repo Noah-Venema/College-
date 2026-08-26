@@ -4,6 +4,9 @@ A personal hub for managing the college search and application process —
 scholarships, financial aid, applications, school comparisons, housing, contacts,
 notes, a calendar, and a Community space to connect with friends, all in one place.
 
+**Live app:** https://Forres973.pythonanywhere.com — works from any phone or computer,
+no local setup needed. Sign up for your own account to get started.
+
 ## Stack
 - Flask (backend)
 - Flask-SQLAlchemy (SQLite database)
@@ -33,12 +36,22 @@ what's explicitly posted in the Community tab.
 > unless the app is deployed to a public host (see below). This is why the old
 > README link couldn't be opened anywhere else.
 
-## Deploying so it works from any device
+## Deploying updates to the live site
 
-To get one real URL that works from any computer or phone, deploy to a host with
-persistent storage (needed since this app uses a real SQLite file + uploaded
-documents). [PythonAnywhere](https://www.pythonanywhere.com) has a free tier that
-fits well:
+The app is hosted on [PythonAnywhere](https://www.pythonanywhere.com) (free tier,
+persistent storage for the SQLite DB + uploaded documents). To push new changes live
+after merging to `main`:
+
+1. Open a **Bash console** on PythonAnywhere and pull the latest code:
+   ```bash
+   cd ~/College-
+   git pull origin main
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. Go to the **Web** tab and click **Reload**.
+
+### Setting this up fresh on a new host
 
 1. Create a free account at pythonanywhere.com.
 2. Open a **Bash console** from the dashboard and clone the repo:
@@ -64,8 +77,7 @@ fits well:
 6. On the **Web** tab, add an environment variable `SECRET_KEY` set to a long random
    string (don't reuse the local dev default).
 7. Click **Reload** on the Web tab. Your app is now live at
-   `https://<yourusername>.pythonanywhere.com` — that's the link to share/bookmark
-   instead of the localhost one.
+   `https://<yourusername>.pythonanywhere.com`.
 
 ## Sections
 
