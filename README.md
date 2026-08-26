@@ -4,7 +4,7 @@ A personal hub for managing the college search and application process —
 scholarships, financial aid, applications, school comparisons, housing, contacts,
 notes, a calendar, and a Community space to connect with friends, all in one place.
 
-**Live app:** https://Forres973.pythonanywhere.com — works from any phone or computer,
+**Live app:** https://Forrest973.pythonanywhere.com — works from any phone or computer,
 no local setup needed. Sign up for your own account to get started.
 
 ## Stack
