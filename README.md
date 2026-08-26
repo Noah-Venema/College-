@@ -18,7 +18,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Run
+## Run (local development)
 
 ```bash
 python app.py
@@ -27,6 +27,45 @@ python app.py
 Open http://127.0.0.1:5002 and sign up for an account. Every account gets its own
 private set of data across all sections — nothing is shared between users except
 what's explicitly posted in the Community tab.
+
+> **Note:** `http://127.0.0.1:5002` is "localhost" — it only ever points to whatever
+> computer you open it from. It will **not** work from a different phone or computer
+> unless the app is deployed to a public host (see below). This is why the old
+> README link couldn't be opened anywhere else.
+
+## Deploying so it works from any device
+
+To get one real URL that works from any computer or phone, deploy to a host with
+persistent storage (needed since this app uses a real SQLite file + uploaded
+documents). [PythonAnywhere](https://www.pythonanywhere.com) has a free tier that
+fits well:
+
+1. Create a free account at pythonanywhere.com.
+2. Open a **Bash console** from the dashboard and clone the repo:
+   ```bash
+   git clone https://github.com/Noah-Venema/College-.git
+   cd College-
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. In the **Web** tab, click **Add a new web app** → choose **Manual configuration**
+   (Flask) → pick the same Python version as your virtualenv.
+4. Set the **virtualenv** path to `/home/<yourusername>/College-/venv`.
+5. Edit the generated **WSGI configuration file** so it points at this project's
+   `wsgi.py` (already included in the repo), e.g.:
+   ```python
+   import sys
+   path = '/home/<yourusername>/College-'
+   if path not in sys.path:
+       sys.path.insert(0, path)
+   from wsgi import application
+   ```
+6. On the **Web** tab, add an environment variable `SECRET_KEY` set to a long random
+   string (don't reuse the local dev default).
+7. Click **Reload** on the Web tab. Your app is now live at
+   `https://<yourusername>.pythonanywhere.com` — that's the link to share/bookmark
+   instead of the localhost one.
 
 ## Sections
 
