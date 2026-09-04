@@ -332,6 +332,48 @@ class CreditTransfer(db.Model):
     EXAM_TYPES = ["AP", "IB", "CLEP", "Dual Enrollment"]
 
 
+class AthleteProfile(db.Model):
+    """A student-athlete's recruiting profile (one per user), covering NCAA/NAIA
+    eligibility center registration status alongside sport/position basics."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    primary_sport = db.Column(db.String(100))
+    position = db.Column(db.String(100))
+    graduation_year = db.Column(db.String(10))
+    height = db.Column(db.String(20))
+    weight = db.Column(db.String(20))
+    ncaa_eligibility_status = db.Column(db.String(30), default="Not Registered")
+    ncaa_id = db.Column(db.String(50))
+    naia_eligibility_status = db.Column(db.String(30), default="Not Registered")
+    naia_id = db.Column(db.String(50))
+    highlight_video_link = db.Column(db.String(500))
+    notes = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    ELIGIBILITY_STATUSES = ["Not Registered", "Registered", "Certified"]
+
+
+class RecruitingEntry(db.Model):
+    """Tracks recruiting progress with a specific school's athletic program —
+    coach contact info and where things stand (contacted, offered, committed, etc.)."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    school_name = db.Column(db.String(200), nullable=False)
+    division = db.Column(db.String(30), default="None")
+    coach_name = db.Column(db.String(200))
+    coach_email = db.Column(db.String(200))
+    coach_phone = db.Column(db.String(30))
+    status = db.Column(db.String(30), nullable=False, default="Not Contacted")
+    scholarship_details = db.Column(db.String(300))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    STATUSES = ["Not Contacted", "Contacted", "Camp/Visit", "Offered", "Committed", "Declined"]
+
+
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

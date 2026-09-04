@@ -64,6 +64,13 @@
               <br>
             {% endif %}
 
+            <form method="POST" action="{{ url_for('applications.upload_recommender_letter', recommender_id=rec.id) }}" enctype="multipart/form-data" class="input-group input-group-sm mb-2" style="max-width: 420px;">
+              <input type="file" name="letter_file" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.gif,.heic" required>
+              <button class="btn btn-outline-gold" type="submit">
+                <i class="bi bi-upload"></i> {% if rec.letter_path %}Replace{% else %}Upload{% endif %} Letter
+              </button>
+            </form>
+
             <div class="input-group input-group-sm mb-2" style="max-width: 420px;">
               <input type="text" class="form-control" value="{{ portal_links[rec.id] }}" readonly onclick="this.select();">
               <button class="btn btn-outline-gold" type="button" onclick="navigator.clipboard.writeText('{{ portal_links[rec.id] }}'); this.textContent='Copied!';">Copy Link</button>

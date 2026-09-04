@@ -735,6 +735,27 @@ def _save_recommender_upload(file_storage):
     return stored_name, original_name
 
 
+@applications_bp.route("/recommenders/<int:recommender_id>/upload", methods=["POST"])
+@login_required
+def upload_recommender_letter(recommender_id):
+    """Lets the student upload a letter PDF directly (e.g. one emailed to them),
+    without needing to go through the recommender's public portal link."""
+    recommender = Recommender.query.filter_by(id=recommender_id, user_id=current_user.id).first_or_404()
+    stored_name, original_name = _save_recommender_upload(request.files.get("letter_file"))
+    if stored_name:
+        if recommender.letter_path:
+            old_path = os.path.join(current_app.config["RECOMMENDER_UPLOAD_FOLDER"], recommender.letter_path)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+        recommender.letter_path = stored_name
+        recommender.letter_original_filename = original_name
+        recommender.status = "Received"
+        recommender.received_at = datetime.utcnow()
+        db.session.commit()
+        flash("Letter uploaded.", "success")
+    return redirect(url_for("applications.recommenders"))
+
+
 @applications_bp.route("/recommenders/portal/<token>", methods=["GET", "POST"])
 def recommender_portal(token):
     """Public, login-free page a recommender can use to upload their letter.

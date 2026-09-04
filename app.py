@@ -54,6 +54,7 @@ def create_app():
     from routes.calendar import calendar_bp
     from routes.community import community_bp
     from routes.notifications import notifications_bp
+    from routes.athletics import athletics_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -67,6 +68,7 @@ def create_app():
     app.register_blueprint(calendar_bp)
     app.register_blueprint(community_bp)
     app.register_blueprint(notifications_bp)
+    app.register_blueprint(athletics_bp)
 
     @app.context_processor
     def inject_globals():
