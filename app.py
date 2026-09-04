@@ -129,5 +129,13 @@ def _seed_essay_prompts():
 
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=5002)
+    # Import create_app through the "app" module name (instead of using the
+    # create_app() already defined in this __main__ script) so that this module
+    # only ever gets loaded once. Without this, running `python app.py` directly
+    # causes Python to load this file twice under two different module names
+    # (once as "__main__", once as "app" — triggered by models.py's `from app
+    # import db`), creating two separate, out-of-sync SQLAlchemy() instances and
+    # a "not registered with this SQLAlchemy instance" error at startup.
+    from app import create_app as _create_app
+
+    _create_app().run(debug=True, port=5002)
