@@ -29,6 +29,22 @@
         <input type="text" name="acceptance_rate" class="form-control" placeholder="e.g. 74%">
       </div>
       <div class="col-md-4">
+        <label class="form-label">Religious Affiliation</label>
+        <input type="text" name="religious_affiliation" class="form-control" placeholder="e.g. Catholic, or leave blank if secular">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Athletic Association</label>
+        <select name="athletic_association" class="form-select">
+          {% for a in athletic_associations %}
+          <option value="{{ a }}">{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Activities Offered</label>
+        <input type="text" name="activities_offered" class="form-control" placeholder="e.g. Clubs, greek life, intramurals, arts groups">
+      </div>
+      <div class="col-md-4">
         <label class="form-label">Notes</label>
         <input type="text" name="notes" class="form-control">
       </div>
@@ -48,6 +64,9 @@
           <th>Size</th>
           <th>Tuition</th>
           <th>Acceptance Rate</th>
+          <th>Religious Affiliation</th>
+          <th>Athletics</th>
+          <th>Activities Offered</th>
           <th>Notes</th>
           <th>Campus Life</th>
           <th></th>
@@ -61,6 +80,9 @@
           <td>{{ school.size or '—' }}</td>
           <td>{{ school.tuition or '—' }}</td>
           <td>{{ school.acceptance_rate or '—' }}</td>
+          <td>{{ school.religious_affiliation or 'Secular / Not specified' }}</td>
+          <td>{{ school.athletic_association or 'None' }}</td>
+          <td>{{ school.activities_offered or '—' }}</td>
           <td>{{ school.notes or '—' }}</td>
           <td>
             {% set campus = campus_map.get(school.name.strip().lower()) %}
@@ -83,7 +105,7 @@
           </td>
         </tr>
         <tr class="collapse" id="edit-school-{{ school.id }}">
-          <td colspan="8">
+          <td colspan="11">
             <form method="POST" action="{{ url_for('schools.edit_school', school_id=school.id) }}" class="row g-2 align-items-end">
               <div class="col-md-2">
                 <label class="form-label">Name</label>
@@ -93,19 +115,35 @@
                 <label class="form-label">Location</label>
                 <input type="text" name="location" class="form-control form-control-sm" value="{{ school.location or '' }}">
               </div>
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <label class="form-label">Size</label>
                 <input type="text" name="size" class="form-control form-control-sm" value="{{ school.size or '' }}">
               </div>
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <label class="form-label">Tuition</label>
                 <input type="text" name="tuition" class="form-control form-control-sm" value="{{ school.tuition or '' }}">
               </div>
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <label class="form-label">Acceptance Rate</label>
                 <input type="text" name="acceptance_rate" class="form-control form-control-sm" value="{{ school.acceptance_rate or '' }}">
               </div>
-              <div class="col-md-1">
+              <div class="col-md-2">
+                <label class="form-label">Religious Affiliation</label>
+                <input type="text" name="religious_affiliation" class="form-control form-control-sm" value="{{ school.religious_affiliation or '' }}">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Athletics</label>
+                <select name="athletic_association" class="form-select form-select-sm">
+                  {% for a in athletic_associations %}
+                  <option value="{{ a }}" {% if school.athletic_association == a %}selected{% endif %}>{{ a }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Activities Offered</label>
+                <input type="text" name="activities_offered" class="form-control form-control-sm" value="{{ school.activities_offered or '' }}">
+              </div>
+              <div class="col-md-2">
                 <label class="form-label">Notes</label>
                 <input type="text" name="notes" class="form-control form-control-sm" value="{{ school.notes or '' }}">
               </div>
@@ -167,6 +205,19 @@
           <form method="POST" action="{{ url_for('schools.delete_matchup', matchup_id=matchup.id) }}" onsubmit="return confirm('Delete this matchup?');">
             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
           </form>
+        </div>
+        <div class="table-responsive mt-2">
+          <table class="table table-sm mb-2">
+            <tbody>
+              <tr><th scope="row">Location</th><td>{{ matchup.school_a.location or '—' }}</td><td>{{ matchup.school_b.location or '—' }}</td></tr>
+              <tr><th scope="row">Size</th><td>{{ matchup.school_a.size or '—' }}</td><td>{{ matchup.school_b.size or '—' }}</td></tr>
+              <tr><th scope="row">Tuition</th><td>{{ matchup.school_a.tuition or '—' }}</td><td>{{ matchup.school_b.tuition or '—' }}</td></tr>
+              <tr><th scope="row">Acceptance Rate</th><td>{{ matchup.school_a.acceptance_rate or '—' }}</td><td>{{ matchup.school_b.acceptance_rate or '—' }}</td></tr>
+              <tr><th scope="row">Religious Affiliation</th><td>{{ matchup.school_a.religious_affiliation or 'Secular / Not specified' }}</td><td>{{ matchup.school_b.religious_affiliation or 'Secular / Not specified' }}</td></tr>
+              <tr><th scope="row">Athletics</th><td>{{ matchup.school_a.athletic_association or 'None' }}</td><td>{{ matchup.school_b.athletic_association or 'None' }}</td></tr>
+              <tr><th scope="row">Activities Offered</th><td>{{ matchup.school_a.activities_offered or '—' }}</td><td>{{ matchup.school_b.activities_offered or '—' }}</td></tr>
+            </tbody>
+          </table>
         </div>
         {% if matchup.notes %}<p class="mb-0">{{ matchup.notes }}</p>{% endif %}
       </div>

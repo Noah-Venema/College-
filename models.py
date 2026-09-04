@@ -210,8 +210,27 @@ class School(db.Model):
     tuition = db.Column(db.String(50))
     acceptance_rate = db.Column(db.String(20))
     notes = db.Column(db.Text)
+    # Clubs, greek life, intramurals, arts groups, etc. offered on campus — used when
+    # comparing schools side-by-side beyond just academics/cost.
+    activities_offered = db.Column(db.Text)
+    # Free text (e.g. "Catholic", "Non-denominational Christian") if the school identifies
+    # as a religious institution; blank/None means the school is secular or unspecified.
+    religious_affiliation = db.Column(db.String(100))
+    # Level of intercollegiate athletics the school competes at, for student-athletes
+    # weighing recruiting/roster-spot opportunities alongside academics.
+    athletic_association = db.Column(db.String(30), default="None")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    ATHLETIC_ASSOCIATIONS = [
+        "None",
+        "NCAA Division I",
+        "NCAA Division II",
+        "NCAA Division III",
+        "NAIA",
+        "NJCAA",
+        "Other",
+    ]
 
 
 class Matchup(db.Model):
@@ -310,7 +329,7 @@ class CreditTransfer(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    EXAM_TYPES = ["AP", "IB", "CLEP"]
+    EXAM_TYPES = ["AP", "IB", "CLEP", "Dual Enrollment"]
 
 
 class Notification(db.Model):

@@ -28,6 +28,9 @@ def index():
                 tuition=request.form.get("tuition", "").strip(),
                 acceptance_rate=request.form.get("acceptance_rate", "").strip(),
                 notes=request.form.get("notes", "").strip(),
+                activities_offered=request.form.get("activities_offered", "").strip(),
+                religious_affiliation=request.form.get("religious_affiliation", "").strip(),
+                athletic_association=request.form.get("athletic_association", "None"),
             )
             db.session.add(school)
             db.session.commit()
@@ -48,6 +51,7 @@ def index():
         matchups=matchups,
         credit_transfers=credit_transfers,
         exam_types=CreditTransfer.EXAM_TYPES,
+        athletic_associations=School.ATHLETIC_ASSOCIATIONS,
     )
 
 
@@ -61,6 +65,9 @@ def edit_school(school_id):
     school.tuition = request.form.get("tuition", "").strip()
     school.acceptance_rate = request.form.get("acceptance_rate", "").strip()
     school.notes = request.form.get("notes", "").strip()
+    school.activities_offered = request.form.get("activities_offered", "").strip()
+    school.religious_affiliation = request.form.get("religious_affiliation", "").strip()
+    school.athletic_association = request.form.get("athletic_association", school.athletic_association)
     db.session.commit()
     flash("School updated.", "success")
     return redirect(url_for("schools.index"))
